@@ -1,6 +1,6 @@
 package types;
 
-public class Double implements DataType {
+public class Doub implements DataType {
     @Override //переопределяем метод из интерфейса
     public String get_name() {
         return "double";
@@ -9,7 +9,7 @@ public class Double implements DataType {
     @Override
     public Object parse(String str){
         try {
-            return Integer.parseInt(str.trim());
+            return Double.parseDouble(str.trim());
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Ожидалось дробное число (double), а мы имеем: " + str);
         }
