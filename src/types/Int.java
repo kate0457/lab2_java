@@ -2,12 +2,12 @@ package types;
 
 public class Int implements DataType {
     @Override //переопределяем метод из интерфейса
-    public Str get_name() {
+    public String get_name() {
         return "int";
     }
 
     @Override
-    public Object parse(Str str){
+    public Object parse(String str){
         try {
             return Integer.parseInt(str.trim());
         } catch (NumberFormatException e) {
@@ -25,7 +25,7 @@ public class Int implements DataType {
     }
 
     @Override
-    public Str print(Object value){
+    public String print(Object value){
         correct(value); //проверяем
         return value.toString();
     }

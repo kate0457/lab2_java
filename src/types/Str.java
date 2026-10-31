@@ -8,11 +8,7 @@ public class Str implements DataType {
 
     @Override
     public Object parse(String str){
-        try {
-
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Ожидалось целое число (int), а мы имеем: " + str);
-        }
+        return str.trim();
     }
 
     @Override
