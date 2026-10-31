@@ -17,7 +17,7 @@ public class Int implements DataType {
 
     @Override
     public void correct(Object value){
-        if (value instanceof Int){
+        if (value instanceof Integer){
 
         } else {
             throw new IllegalArgumentException("Ожидался тип int, имеем: " + value.getClass().getSimpleName());
@@ -27,6 +27,6 @@ public class Int implements DataType {
     @Override
     public String print(Object value){
         correct(value); //проверяем
-        return value.print();
+        return value.toString();
     }
 }
