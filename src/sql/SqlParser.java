@@ -182,8 +182,40 @@ public class SqlParser {
             }
             case "DELETE": {
                 String table_name = tokens.get(2);
+                Where final_cond = null;
+                if (tokens.get(3).toUpperCase().equals("WHERE") && tokens.size() > 6){
+                    List<Where.SingleCondition> cond = new ArrayList<>();
+                    List<String> log_op = new ArrayList<>();
+                    String col_name = tokens.get(4);
+                    String operator = tokens.get(5);
+                    String value = tokens.get(6);
+                    cond.add(new Where.SingleCondition(col_name, operator, value));
+                    if (tokens.size() > 9) {
+                        int i = 7;
+                        while(i < tokens.size()){
+                            if (tokens.get(i).toUpperCase().equals("AND") || tokens.get(i).toUpperCase().equals("OR")){
+                                log_op.add(tokens.get(i));
+                                if (i + 3 < tokens.size()){
+                                    String next_col_name = tokens.get(i + 1);
+                                    String next_operator = tokens.get(i + 2);
+                                    String next_value = tokens.get(i + 3);
+                                    cond.add(new Where.SingleCondition(next_col_name, next_operator, next_value));
+                                }
+                                else{
+                                    throw new IllegalArgumentException("Неполное условие после оператора ");
+                                }
+                            }
+                            else{
+                                break;
+                            }
+                            i += 4;
+                        }
+                    }
+                    final_cond = new Where(cond, log_op);
+                }
                 System.out.println(table_name);
-                return new Delete(table_name);
+                final_cond.print();
+                return new Delete(table_name, final_cond);
             }
             case "CREATE":{
                 String table_name = tokens.get(2);
