@@ -27,5 +27,25 @@ public class DataBase implements Serializable{
     }
 
 
+    //сериализация
+    public void save(String file_name){
+        try{
+            //открываем файлик
+            FileOutputStream file = new FileOutputStream(file_name);
+            //преобразует в последовательность байтов и записывает в выходной поток (OutputStream)
+            ObjectOutputStream out = new ObjectOutputStream(file);
+
+            //сохранить объект в файл
+            out.writeObject(this);
+
+            //теперь все закрываем чтобы ничего не мешало, суету не наводило
+            out.close();
+            file.close();
+            System.out.println("База данных успешно сохранена в " + file_name);
+
+        } catch (IOException  e){
+            System.out.println("Ошибка при сохранении: " + e.getMessage());
+        }
+    }
 
 }
