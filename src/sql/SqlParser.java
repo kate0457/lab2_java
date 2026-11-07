@@ -32,7 +32,30 @@ public class SqlParser {
             case "INSERT": {
                 String table_name = tokens.get(2);
                 List<String> raw_val = new ArrayList<>();
-                for (int i = 5;  i < tokens.size(); i++){
+                List<String> col_name = new ArrayList<>();
+                int values_index = 0;
+                for (int i = 3; i < tokens.size(); i++){
+                    if (tokens.get(i).toUpperCase().equals("VALUES")){
+                        values_index = i;
+                        break;
+                    }
+                }
+
+                if (values_index == -1){
+                    throw new IllegalArgumentException("Ошибка синтаксиса INSERT: пропущено ключевое слово VALUES");
+                }
+
+                if (tokens.get(3).equals("(")){
+                    for (int i = 4; i < tokens.size(); i++){
+                        String token = tokens.get(i);
+                        if (token.equals(")")){
+                            break;
+                        }
+                        col_name.add(token);
+                    }
+                }
+
+                for (int i = (values_index + 2); i < tokens.size(); i++){
                     String token = tokens.get(i);
                     if (token.equals(")")){
                         break;
@@ -40,8 +63,9 @@ public class SqlParser {
                     raw_val.add(token);
                 }
                 System.out.println(table_name);
-                System.out.print(raw_val);
-                return new Insert(table_name, raw_val);
+                System.out.println(raw_val);
+                System.out.println(col_name);
+                return new Insert(table_name, raw_val, col_name);
             }
             case "SELECT":{
                 if (tokens.get(1).equals("*")){
