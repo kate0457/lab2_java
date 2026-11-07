@@ -111,7 +111,9 @@ public class SqlParser {
                 return new Create(table_name, col_name, col_type);
             }
             case "DROP":
-                throw new UnsupportedOperationException("Команда еще не реализована");
+                String table_name = tokens.get(2);
+                System.out.println(table_name);
+                return new Drop(table_name);
             default:
                 throw new UnsupportedOperationException("Команда еще не реализована");
         }
