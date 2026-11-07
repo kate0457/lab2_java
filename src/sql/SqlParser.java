@@ -30,7 +30,7 @@ public class SqlParser {
         }
         String first_word = tokens.getFirst().toUpperCase();
         switch (first_word){
-            case "INSERT":
+            case "INSERT": {
                 String table_name = tokens.get(2);
                 List<String> raw_val = new ArrayList<>();
                 for (int i = 5;  i < tokens.size(); i++){
@@ -43,8 +43,29 @@ public class SqlParser {
                 System.out.println(table_name);
                 System.out.print(raw_val);
                 return new Insert(table_name, raw_val);
-            case "SELECT":
-                throw new UnsupportedOperationException("Команда еще не реализована");
+            }
+            case "SELECT":{
+                if (tokens.get(1).equals("*")){
+                    String table_name = tokens.get(3);
+                    System.out.println(table_name);
+                    return new Select(table_name);
+                }
+                else{
+                    List<String> col = new ArrayList<>();
+                    int index = 0;
+                    for (int i = 1; i < tokens.size(); i++){
+                        String token = tokens.get(i);
+                        if (token.equals("FROM")){
+                            index = i;
+                            break;
+                        }
+                        col.add(token);
+                    }
+                    System.out.println(tokens.get(index + 1));
+                    System.out.println(col);
+                    return new Select(tokens.get(index + 1), col);
+                }
+            }
             case "UPDATE":
                 throw new UnsupportedOperationException("Команда еще не реализована");
             case "DELETE":
