@@ -1,7 +1,6 @@
 package sql;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -66,8 +65,27 @@ public class SqlParser {
                     return new Select(tokens.get(index + 1), col);
                 }
             }
-            case "UPDATE":
-                throw new UnsupportedOperationException("Команда еще не реализована");
+            case "UPDATE":{
+                String table_name = tokens.get(1);
+                Map<String, String> update_val = new HashMap<>();
+                int i = 3;
+                while (i < tokens.size()){
+                    String token = tokens.get(i);
+                    if (token.toUpperCase().equals("WHERE")){
+                        break;
+                    }
+                    String col_name = token;
+                    if(i + 2 < tokens.size() && tokens.get(i + 1).equals("=")){
+                        String val = tokens.get(i + 2);
+                        update_val.put(col_name, val);
+                        i += 2;
+                    }
+                    i++;
+                }
+                System.out.println(table_name);
+                System.out.println(update_val);
+                return new Update(table_name, update_val);
+            }
             case "DELETE":
                 throw new UnsupportedOperationException("Команда еще не реализована");
             case "CREATE":
