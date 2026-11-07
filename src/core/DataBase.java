@@ -14,7 +14,6 @@ public class DataBase implements Serializable{
         this.tables = new HashMap<>();
     }
 
-
     //добавить новую таблицу в базу
     public void add_table(Table table) {
         String name = table.get_struct().get_table_name();
@@ -45,6 +44,38 @@ public class DataBase implements Serializable{
 
         } catch (IOException  e){
             System.out.println("Ошибка при сохранении: " + e.getMessage());
+        }
+    }
+
+    //загрузить базу из файла
+    public static DataBase load(String file_name){
+        try{
+            //FileInputStream позволяет читать данные из файла в виде последовательности байтов
+
+            FileInputStream file = new FileInputStream(file_name);
+
+            //ObjectInputStream - десериализация, то есть восстановление объектов и примитивных данных из потока, который ранее был записан с помощью ObjectOutputStream
+            ObjectInputStream in = new ObjectInputStream(file);
+
+            //читаем файл, приводим к типу датабейз
+            Object obj = in.readObject();
+            DataBase db = (DataBase) obj;
+
+            //все закрыли без суеты
+            in.close();
+            file.close();
+
+            System.out.println("База данных успешно загружена из " + file_name);
+            return db;
+        } catch (FileNotFoundException e){
+            System.out.println("Файл базы данных не найден. Будет создана новая база.");
+            return null; //полный ноль тк базы нет
+        } catch (ClassNotFoundException e) {
+            System.out.println("Ошибка при загрузке (класс не найден): " + e.getMessage());
+            return null;
+        } catch (IOException e) {
+            System.out.println("Ошибка при загрузке (ввод/вывод ): " + e.getMessage());
+            return null;
         }
     }
 
