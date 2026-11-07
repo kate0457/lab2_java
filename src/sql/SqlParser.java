@@ -133,11 +133,39 @@ public class SqlParser {
             case "UPDATE":{
                 String table_name = tokens.get(1);
                 Map<String, String> update_val = new HashMap<>();
+                Where final_cond = null;
                 int i = 3;
                 while (i < tokens.size()){
                     String token = tokens.get(i);
-                    if (token.toUpperCase().equals("WHERE")){
-                        break;
+                    if (token.toUpperCase().equals("WHERE") && (i + 3) < tokens.size()){
+                        List<Where.SingleCondition> cond = new ArrayList<>();
+                        List<String> log_op = new ArrayList<>();
+                        String col_name = tokens.get(i + 1);
+                        String operator = tokens.get(i + 2);
+                        String value = tokens.get(i + 3);
+                        cond.add(new Where.SingleCondition(col_name, operator, value));
+                        if (tokens.size() > (i + 4)) {
+                            int index = i + 4;
+                            while(index < tokens.size()){
+                                if (tokens.get(index).toUpperCase().equals("AND") || tokens.get(index).toUpperCase().equals("OR")){
+                                    log_op.add(tokens.get(index));
+                                    if (index + 3 < tokens.size()){
+                                        String next_col_name = tokens.get(index + 1);
+                                        String next_operator = tokens.get(index + 2);
+                                        String next_value = tokens.get(index + 3);
+                                        cond.add(new Where.SingleCondition(next_col_name, next_operator, next_value));
+                                    }
+                                    else{
+                                        throw new IllegalArgumentException("Неполное условие после оператора ");
+                                    }
+                                }
+                                else{
+                                    break;
+                                }
+                                index += 4;
+                            }
+                        }
+                        final_cond = new Where(cond, log_op);
                     }
                     String col_name = token;
                     if(i + 2 < tokens.size() && tokens.get(i + 1).equals("=")){
@@ -149,7 +177,8 @@ public class SqlParser {
                 }
                 System.out.println(table_name);
                 System.out.println(update_val);
-                return new Update(table_name, update_val);
+                final_cond.print();
+                return new Update(table_name, update_val, final_cond);
             }
             case "DELETE": {
                 String table_name = tokens.get(2);
