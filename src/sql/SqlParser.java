@@ -91,8 +91,25 @@ public class SqlParser {
                 System.out.println(table_name);
                 return new Delete(table_name);
             }
-            case "CREATE":
-                throw new UnsupportedOperationException("Команда еще не реализована");
+            case "CREATE":{
+                String table_name = tokens.get(2);
+                List<String> col_name = new ArrayList<>();
+                List<String> col_type = new ArrayList<>();
+                int i = 4;
+                while (i < tokens.size()){
+                    String token = tokens.get(i);
+                    if (token.equals(")")){
+                        break;
+                    }
+                    col_name.add(token);
+                    col_type.add(tokens.get(i + 1));
+                    i += 2;
+                }
+                System.out.println(table_name);
+                System.out.println(col_name);
+                System.out.println(col_type);
+                return new Create(table_name, col_name, col_type);
+            }
             case "DROP":
                 throw new UnsupportedOperationException("Команда еще не реализована");
             default:
