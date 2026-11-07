@@ -46,11 +46,44 @@ public class SqlParser {
             case "SELECT":{
                 if (tokens.get(1).equals("*")){
                     String table_name = tokens.get(3);
+                    Where final_cond = null;
+                    if (tokens.size() > 4 && tokens.get(4).toUpperCase().equals("WHERE")){
+                        List<Where.SingleCondition> cond = new ArrayList<>();
+                        List<String> log_op = new ArrayList<>();
+                        String col_name = tokens.get(5);
+                        String operator = tokens.get(6);
+                        String value = tokens.get(7);
+                        cond.add(new Where.SingleCondition(col_name, operator, value));
+                        if (tokens.size() > 9) {
+                            int i = 8;
+                            while(i < tokens.size()){
+                                if (tokens.get(i).toUpperCase().equals("AND") || tokens.get(i).toUpperCase().equals("OR")){
+                                    log_op.add(tokens.get(i));
+                                    if (i + 3 < tokens.size()){
+                                        String next_col_name = tokens.get(i + 1);
+                                        String next_operator = tokens.get(i + 2);
+                                        String next_value = tokens.get(i + 3);
+                                        cond.add(new Where.SingleCondition(next_col_name, next_operator, next_value));
+                                    }
+                                    else{
+                                        throw new IllegalArgumentException("Неполное условие после оператора ");
+                                    }
+                                }
+                                else{
+                                    break;
+                                }
+                                i += 4;
+                            }
+                        }
+                        final_cond = new Where(cond, log_op);
+                    }
+                    List<String> col_name = new ArrayList<>();
                     System.out.println(table_name);
-                    return new Select(table_name);
+                    return new Select(table_name, col_name, final_cond);
                 }
                 else{
                     List<String> col = new ArrayList<>();
+                    Where final_cond = null;
                     int index = 0;
                     for (int i = 1; i < tokens.size(); i++){
                         String token = tokens.get(i);
@@ -60,9 +93,41 @@ public class SqlParser {
                         }
                         col.add(token);
                     }
+
+                    if (tokens.size() > (index + 2) && tokens.get(index + 2).toUpperCase().equals("WHERE")){
+                        List<Where.SingleCondition> cond = new ArrayList<>();
+                        List<String> log_op = new ArrayList<>();
+                        String col_name = tokens.get(index + 3);
+                        String operator = tokens.get(index + 4);
+                        String value = tokens.get(index + 5);
+                        cond.add(new Where.SingleCondition(col_name, operator, value));
+                        if (tokens.size() > (index + 9)) {
+                            int i = index + 6;
+                            while(i < tokens.size()){
+                                if (tokens.get(i).toUpperCase().equals("AND") || tokens.get(i).toUpperCase().equals("OR")){
+                                    log_op.add(tokens.get(i));
+                                    if (i + 3 < tokens.size()){
+                                        String next_col_name = tokens.get(i + 1);
+                                        String next_operator = tokens.get(i + 2);
+                                        String next_value = tokens.get(i + 3);
+                                        cond.add(new Where.SingleCondition(next_col_name, next_operator, next_value));
+                                    }
+                                    else{
+                                        throw new IllegalArgumentException("Неполное условие после оператора ");
+                                    }
+                                }
+                                else{
+                                    break;
+                                }
+                                i += 4;
+                            }
+                        }
+                        final_cond = new Where(cond, log_op);
+                    }
                     System.out.println(tokens.get(index + 1));
                     System.out.println(col);
-                    return new Select(tokens.get(index + 1), col);
+                    final_cond.print();
+                    return new Select(tokens.get(index + 1), col, final_cond);
                 }
             }
             case "UPDATE":{
