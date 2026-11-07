@@ -86,8 +86,11 @@ public class SqlParser {
                 System.out.println(update_val);
                 return new Update(table_name, update_val);
             }
-            case "DELETE":
-                throw new UnsupportedOperationException("Команда еще не реализована");
+            case "DELETE": {
+                String table_name = tokens.get(2);
+                System.out.println(table_name);
+                return new Delete(table_name);
+            }
             case "CREATE":
                 throw new UnsupportedOperationException("Команда еще не реализована");
             case "DROP":
