@@ -1,5 +1,5 @@
 package sql;
 
 public interface SqlCommand {
-    String getTableName();
+    String getTableName();          //функция для названия таблицы
 }

@@ -41,12 +41,12 @@ public class SqlParser {
                     }
                 }
 
-                if (values_index == -1){
+                if (values_index == 0){
                     throw new IllegalArgumentException("Ошибка синтаксиса INSERT: пропущено ключевое слово VALUES");
                 }
 
                 if (tokens.get(3).equals("(")){
-                    for (int i = 4; i < tokens.size(); i++){
+                    for (int i = 4; i < values_index; i++){
                         String token = tokens.get(i);
                         if (token.equals(")")){
                             break;
@@ -192,7 +192,7 @@ public class SqlParser {
                         final_cond = new Where(cond, log_op);
                     }
                     String col_name = token;
-                    if(i + 2 < tokens.size() && tokens.get(i + 1).equals("=")){
+                    if(i + 2 < tokens.size() && tokens.get(i + 1).equals("=") && !(tokens.get(i).equals("WHERE"))){
                         String val = tokens.get(i + 2);
                         update_val.put(col_name, val);
                         i += 2;
