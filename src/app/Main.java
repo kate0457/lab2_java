@@ -57,17 +57,29 @@ public class Main {
                 System.out.println("введите имя новой базы данных:");
                 String newdb_name = scaner.nextLine().trim();
                 if(!newdb_name.endsWith(".db")){
-                    newdb_name += ".bd";
+                    newdb_name += ".db";
                 }
+                File newbd_file = new File(cur_dir, newdb_name);
+                file_name = newbd_file.getAbsolutePath();
                 bd = new DataBase();
+                bd.save(file_name);
                 System.out.println("создана новая база данных " + newdb_name);
             }
             else{                       //остальные циферки и буковки
                 try {
                     int file_number = Integer.parseInt(choice);             //пытаемся сделать цифрой
-                    if(file_number > 0 && file_number < db_files.size()){   //проверяем не ввели ли какую-то численную белеберду
-                        file_name = db_files.get(file_number - 1);
-                        bd = DataBase.load(file_name);                      //загружаем бд
+                    if(file_number > 0 && file_number <= db_files.size()){   //проверяем не ввели ли какую-то численную белеберду
+                        File load_file = new File(cur_dir, db_files.get(file_number - 1));
+                        file_name = load_file.getAbsolutePath();
+                        DataBase load_bd = DataBase.load(file_name);                      //пытаемся загрузить бд
+                        if(load_bd == null){
+                            System.out.println("ошибка, неудалось открыть базу данных");
+                            System.out.println("возможно файл имеет неверный формат (например SQLite) или поврежден");
+                            System.out.println("откройте файл с правильным форматом или создайте новую бд, нажав 0");
+                        }
+                        else{
+                            bd = load_bd;
+                        }
                     }
                     else{
                         System.out.println("неверный номер, попробуйте еще раз ввести нужное число или введите 0 для создания новой бд");
