@@ -9,14 +9,14 @@ import java.util.Map;
 import java.util.Scanner;
 import java.io.File;                //для выбора файликов
 public class Main {
-
+    private static String file_name = "";
     public static void main(String[] args) {
         Scanner scaner = new Scanner(System.in);
         SqlParser parser = new SqlParser();
         DataBase bd = null;
         File cur_dir = null;
 
-        while(cur_dir == null){
+        while(cur_dir == null){         //запрашиваем у пользователя путь до папки и его обрабатываем
             System.out.println("введите корректный путь к папке, где лежат базы данных,\n(или нажмите Enter для выбора текущей папки):");
             String input_path = scaner.nextLine().trim();
 
@@ -37,7 +37,7 @@ public class Main {
         File[] files = cur_dir.listFiles(((dir, name) -> name.endsWith(".db")));        //лямбда функция, которая отбирает в список только бдшные файлы
         List<String> db_files = new ArrayList<>();
 
-        if(files != null && files.length > 0){
+        if(files != null && files.length > 0){              //создаем список названий файлов, если они есть
             System.out.println("найдены существующие базы данных:");
             for(int i = 0; i < files.length; i++){
                 db_files.add(files[i].getName());
@@ -47,6 +47,36 @@ public class Main {
         }
         else{
             System.out.println("не нашлось существующих баз данных\nвведите 0 для создания новой");
+        }
+
+        while (bd == null){             //выбираем что делать с веденным числом
+            System.out.println("ваш выбор: ");
+            String choice = scaner.nextLine().trim();
+
+            if(choice.equals("0")){     //если 0, создаем новую бд
+                System.out.println("введите имя новой базы данных:");
+                String newdb_name = scaner.nextLine().trim();
+                if(!newdb_name.endsWith(".db")){
+                    newdb_name += ".bd";
+                }
+                bd = new DataBase();
+                System.out.println("создана новая база данных " + newdb_name);
+            }
+            else{                       //остальные циферки и буковки
+                try {
+                    int file_number = Integer.parseInt(choice);             //пытаемся сделать цифрой
+                    if(file_number > 0 && file_number < db_files.size()){   //проверяем не ввели ли какую-то численную белеберду
+                        file_name = db_files.get(file_number - 1);
+                        bd = DataBase.load(file_name);                      //загружаем бд
+                    }
+                    else{
+                        System.out.println("неверный номер, попробуйте еще раз ввести нужное число или введите 0 для создания новой бд");
+                    }
+                }
+                catch(NumberFormatException e){                             //если буквы
+                    System.out.println("нужно ввести число, а не букву или слова");
+                }
+            }
         }
     }
 }
