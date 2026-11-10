@@ -18,7 +18,6 @@ public class SqlParser {
             }
             tokens.add(token);
         }
-        System.out.println(tokens);
         return tokens;
     }
 
@@ -63,9 +62,6 @@ public class SqlParser {
                     }
                     raw_val.add(token);
                 }
-                System.out.println(table_name);
-                System.out.println(raw_val);
-                System.out.println(col_name);
                 return new Insert(table_name, raw_val, col_name);
             }
             case "SELECT":{
@@ -103,7 +99,6 @@ public class SqlParser {
                         final_cond = new Where(cond, log_op);
                     }
                     List<String> col_name = new ArrayList<>();
-                    System.out.println(table_name);
                     return new Select(table_name, col_name, final_cond);
                 }
                 else{
@@ -149,9 +144,6 @@ public class SqlParser {
                         }
                         final_cond = new Where(cond, log_op);
                     }
-                    System.out.println(tokens.get(index + 1));
-                    System.out.println(col);
-                    final_cond.print();
                     return new Select(tokens.get(index + 1), col, final_cond);
                 }
             }
@@ -200,9 +192,6 @@ public class SqlParser {
                     }
                     i++;
                 }
-                System.out.println(table_name);
-                System.out.println(update_val);
-                final_cond.print();
                 return new Update(table_name, update_val, final_cond);
             }
             case "DELETE": {
@@ -238,8 +227,6 @@ public class SqlParser {
                     }
                     final_cond = new Where(cond, log_op);
                 }
-                System.out.println(table_name);
-                final_cond.print();
                 return new Delete(table_name, final_cond);
             }
             case "CREATE":{
@@ -256,14 +243,10 @@ public class SqlParser {
                     col_type.add(tokens.get(i + 1));
                     i += 2;
                 }
-                System.out.println(table_name);
-                System.out.println(col_name);
-                System.out.println(col_type);
                 return new Create(table_name, col_name, col_type);
             }
             case "DROP":
                 String table_name = tokens.get(2);
-                System.out.println(table_name);
                 return new Drop(table_name);
             default:
                 throw new UnsupportedOperationException("Команда еще не реализована");
