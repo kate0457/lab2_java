@@ -216,6 +216,18 @@ public class Main {
                     table.update_rows(update_val, conditions, log_oper);
                     bd.save(file_name);
                 }
+
+                else if(command instanceof Delete){
+                    Delete delete_cmd = (Delete) command;
+                    List<Where.SingleCondition> conditions = null;
+                    List<String> log_oper = null;
+                    if(delete_cmd.getCondition() != null){
+                        conditions = delete_cmd.getCondition().getConditions();
+                        log_oper = delete_cmd.getCondition().getLogicalOperator();
+                    }
+                    table.execute_delete(conditions, log_oper);
+                    bd.save(file_name);
+                }
             }
             catch (Exception e){
                 System.out.println("пока не доделала" + e.getMessage());
