@@ -167,6 +167,42 @@ public class Main {
                     System.out.println("запись успешно добавлена");
                     bd.save(file_name);
                 }
+
+                else if(command instanceof Select){
+                    Select select_cmd = (Select) command;
+                    List<String> target_col = select_cmd.getFilterColumnName();
+                    List<Where.SingleCondition> conditions = null;
+                    List<String> log_oper = null;
+                    if(select_cmd.getCondition() != null){
+                        conditions = select_cmd.getCondition().getConditions();
+                        log_oper = select_cmd.getCondition().getLogicalOperator();
+                    }
+                    List<Row> matched_row = table.execute_select(target_col, conditions, log_oper);
+                    System.out.println("результат выполнения SELECT");
+                    if(target_col.isEmpty() || target_col.contains("*")){
+                        for(Row row : matched_row){
+                            System.out.println(row);
+                        }
+                    }
+                    else{
+                        for(Row row : matched_row){
+                            StringBuilder row_output = new StringBuilder("{");      //для красивой строчки
+                            for(int i = 0; i < target_col.size(); i++){
+                                String col_name = target_col.get(i);
+                                if(table.get_struct().get_column(col_name) == null){
+                                    throw new IllegalArgumentException("ошибка: колонка " + col_name + " не найдена");
+                                }
+                                row_output.append(col_name).append("=").append(row.get(col_name));
+                                if(i < target_col.size() - 1){
+                                    row_output.append(", ");
+                                }
+                            }
+                            row_output.append("}");
+                            System.out.println(row_output);
+                        }
+                    }
+                    System.out.println("всего найдено строк: " + matched_row.size());
+                }
             }
             catch (Exception e){
                 System.out.println("пока не доделала" + e.getMessage());
@@ -186,6 +222,8 @@ public class Main {
                 return new Doub();
             case "bool":
                 return new Bool();
+            case "data":
+                return new DateT();
             default:
                 throw new IllegalArgumentException("ошибка: неизвестный тип данных");
         }
