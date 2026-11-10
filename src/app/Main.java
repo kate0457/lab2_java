@@ -228,9 +228,15 @@ public class Main {
                     table.execute_delete(conditions, log_oper);
                     bd.save(file_name);
                 }
+
+                else if(command instanceof Drop){
+                    bd.drop_table(table_name);
+                    System.out.println("таблица " + table_name + " успешно удалена");
+                    bd.save(file_name);
+                }
             }
             catch (Exception e){
-                System.out.println("пока не доделала" + e.getMessage());
+                System.out.println(e.getMessage());
             }
         }
     }
