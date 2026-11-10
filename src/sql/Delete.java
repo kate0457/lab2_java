@@ -1,10 +1,10 @@
 package sql;
 
 public class Delete implements SqlCommand{
-    private final String table_name;
-    private final Where condition;
+    private final String table_name;                                //название таблицы
+    private final Where condition;                                  //блок WHERE
 
-    public Delete(String table, Where condition){
+    public Delete(String table, Where condition){                   //конструктор
         table_name = table;
         this.condition = condition;
     }
@@ -12,9 +12,9 @@ public class Delete implements SqlCommand{
     @Override
     public String getTableName(){
         return table_name;
-    }
+    }             //переопределение метода из SqlCommand
 
-    public Where getCondition(){
+    public Where getCondition(){                                    //возвращает блок WHERE
         return condition;
     }
 }

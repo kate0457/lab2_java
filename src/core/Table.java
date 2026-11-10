@@ -168,34 +168,53 @@ public class Table implements Serializable{
 
 
     //обновление строк по условию
-    public int update_rows(List<Row> rows_to_update, Map<String, Object> new_values) {
-        int updated_count = 0;
-        for (Row row : rows_to_update) {
-            //если эта строка реально есть в таблице
-            if (rows.contains(row)) {
-                for (String col_name : new_values.keySet()) {
-                    row.put(col_name, new_values.get(col_name));
+    public void update_rows(Map<String, String> updateValues, List<Where.SingleCondition> conditions, List<String> logicalOps) {
+        // Ипользуем уже готовый execute_select для поиска строк, подходящих под условие
+        List<Row> targetRows = execute_select(new ArrayList<>(), conditions, logicalOps);
+
+        int updatedCount = 0;
+
+        for (Row row : targetRows) {
+            // Защита уникальности Primary Key, если пользователь пытается изменить ключевой столбец (например, id)
+            Column pkColumn = struct.get_primary_key();
+            if (pkColumn != null && updateValues.containsKey(pkColumn.get_name())) {
+                String pkName = pkColumn.get_name();
+                Object newPkVal = pkColumn.get_type().parse(updateValues.get(pkName));
+
+                for (Row r : rows) {
+                    if (r != row && newPkVal.equals(r.get(pkName))) {
+                        throw new IllegalArgumentException("Ошибка: Нарушение уникальности Primary Key '" + pkName + "' = " + newPkVal);
+                    }
                 }
-                updated_count++;
             }
+
+            // Обновляем ячейки найденной строки с приведением к типам
+            for (Map.Entry<String, String> entry : updateValues.entrySet()) {
+                String colName = entry.getKey();
+                String rawNewValue = entry.getValue();
+
+                Column column = struct.get_column(colName);
+                if (column == null) {
+                    throw new IllegalArgumentException("Ошибка: Колонка '" + colName + "' не существует.");
+                }
+
+                // Магия DataType: парсим строковый текст в нужный Java-объект
+                Object parsedNewValue = column.get_type().parse(rawNewValue);
+                row.put(colName, parsedNewValue);
+            }
+            updatedCount++;
         }
-        return updated_count;
+        System.out.println("Успешно обновлено записей: " + updatedCount);
     }
 
+    // ИСПРАВЛЕНО: Новый метод выполнения DELETE, работающий напрямую со списками условий WHERE
+    public void execute_delete(List<Where.SingleCondition> conditions, List<String> logicalOps) {
+        // Находим строки под удаление через фильтр execute_select
+        List<Row> targetRows = execute_select(new ArrayList<>(), conditions, logicalOps);
 
-    //удалить строку по условию
-    public int delete_rows(List<Row> rows_to_delete) {
-        int deleted_count = 0;
-        for (int i = rows.size() - 1; i >= 0; i--) {
-            Row row = rows.get(i);
+        // Удаляем найденные элементы из основного массива
+        rows.removeAll(targetRows);
 
-            //если эта строка есть в списке на удаление
-            if (rows_to_delete.contains(row)) {
-                rows.remove(i);
-                deleted_count++;
-            }
-        }
-        return deleted_count;
+        System.out.println("Успешно удалено записей: " + targetRows.size());
     }
-
 }

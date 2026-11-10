@@ -1,0 +1,16 @@
+C:\devel\start\tables
+CREATE TABLE Staff (id int, name string, position string, birthday data, has_children bool);
+CREATE TABLE Products (id int, name string, price double, category data, is_available bool);
+INSERT INTO Staff VALUES (1, 'Иван Иванов', 'Разработчик', '15.05.1995', false);
+INSERT INTO Staff (id, name, position) VALUES (2, 'Анна Петрова', 'Дизайнер');
+INSERT INTO Staff VALUES (3, 'Игнат Шапкин', 'Аналитик', '12.08.1991', true);
+INSERT INTO Staff VALUES (4, 'Петр', 'Тестировщик', '02.11.1992', true);
+SELECT * FROM Staff;
+SELECT name, position FROM Staff;
+SELECT * FROM Staff WHERE id = 1;
+SELECT name FROM Staff WHERE position = 'Дизайнер';
+SELECT * FROM Staff WHERE id = 1 AND position = 'Разработчик';
+SELECT name FROM Staff WHERE id = 1 OR position = 'Дизайнер';
+UPDATE Staff SET position = 'Тимлид', has_children = true WHERE id = 1;
+DELETE FROM Staff WHERE position = 'Дизайнер';
+DROP TABLE Products;
