@@ -1,5 +1,5 @@
 package core;
-
+import sql.*;
 import java.io.Serializable; //для сохранения на диск (сериализация)
 import java.util.ArrayList; //динамический массив
 import java.util.List;  //для хранения колонок
@@ -41,10 +41,10 @@ public class Table implements Serializable{
 
             //если строка подходит под условие (condition вернул true) - добавляем её
             if (condition.test(row)) {
-                result.add(row);
+                rows_where.add(row);
             }
         }
-        return result;
+        return rows_where;
     }
 
     //тут щас сложно
@@ -78,6 +78,91 @@ public class Table implements Serializable{
         }
         //все норм, поэтому наконец добавляем строку в таблицу
         rows.add(new_row);
+    }
+
+    public List<Row> execute_select(List<String> targetColumns, List<Where.SingleCondition> conditions, List<String> logicalOperators) {
+        List<Row> resultList = new ArrayList<>();
+
+        // Если блок WHERE пустой, то фильтровать нечего — возвращаем все строки таблицы целиком
+        if (conditions == null || conditions.isEmpty()) {
+            return rows;
+        }
+
+        // Перебираем абсолютно все строки, накопленные в нашей таблице
+        for (int i = 0; i < rows.size(); i++) {
+            Row row = rows.get(i);
+
+            // Вычисляем результат самого первого (базового) условия для текущей строки
+            boolean currentResult = evaluate_single_condition(row, conditions.get(0));
+
+            // Если в запросе есть дополнительные связки AND / OR, идем по ним по цепочке
+            for (int j = 0; j < logicalOperators.size(); j++) {
+                String op = logicalOperators.get(j).toUpperCase();
+
+                // Защитная проверка: проверяем, что для следующего оператора есть соответствующее условие
+                if (j + 1 < conditions.size()) {
+                    boolean nextResult = evaluate_single_condition(row, conditions.get(j + 1));
+
+                    if (op.equals("AND")) {
+                        currentResult = currentResult && nextResult;
+                    } else if (op.equals("OR")) {
+                        currentResult = currentResult || nextResult;
+                    }
+                }
+            }
+
+            // Если после всех логических связок строка нам подошла — добавляем её в итоговый список
+            if (currentResult) {
+                resultList.add(row);
+            }
+        }
+
+        return resultList;
+    }
+
+    /**
+     * Вспомогательный метод: проверяет одну ячейку конкретной строки по одному правилу (например, price > 20000)
+     */
+    private boolean evaluate_single_condition(Row row, Where.SingleCondition single) {
+        String colName = single.getColumnName();
+        Column column = struct.get_column(colName); // Ищем колонку в "паспорте" таблицы
+
+        if (column == null) {
+            throw new IllegalArgumentException("Ошибка выполнения: колонка '" + colName + "' не найдена в структуре таблицы.");
+        }
+
+        Object cellValue = row.get(colName); // Достаем живой объект из ячейки текущей строки
+        if (cellValue == null) return false;
+
+        // Важнейший шаг: прогоняем сырой строковый текст фильтра из SQL через метод parse() нужного типа данных
+        Object filterValue = column.get_type().parse(single.getValue());
+        String operator = single.getOperator();
+
+        // Универсальное сравнение любых объектов в Java (чисел, строк) через интерфейс Comparable
+        if (cellValue instanceof Comparable && filterValue instanceof Comparable) {
+            Comparable c1 = (Comparable) cellValue;
+            Comparable c2 = (Comparable) filterValue;
+            int compare = c1.compareTo(c2);
+
+            switch (operator) {
+                case "=":  return compare == 0;
+                case "!=": return compare != 0;
+                case ">":  return compare > 0;
+                case "<":  return compare < 0;
+                case ">=": return compare >= 0;
+                case "<=": return compare <= 0;
+                default: throw new IllegalArgumentException("Неизвестный оператор сравнения в условии: " + operator);
+            }
+        }
+
+        // Для типов, которые нельзя сравнивать через "больше/меньше" (например, boolean)
+        if (operator.equals("=")) {
+            return cellValue.equals(filterValue);
+        } else if (operator.equals("!=")) {
+            return !cellValue.equals(filterValue);
+        }
+
+        return false;
     }
 
 }
