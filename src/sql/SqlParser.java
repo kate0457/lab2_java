@@ -32,7 +32,7 @@ public class SqlParser {
             case "INSERT": {
                 String table_name = tokens.get(2);
                 List<String> raw_val = new ArrayList<>();
-                List<String> col_name = new ArrayList<>();
+                List<String> col_name = null;
                 int values_index = 0;
                 for (int i = 3; i < tokens.size(); i++){
                     if (tokens.get(i).toUpperCase().equals("VALUES")){
@@ -46,6 +46,7 @@ public class SqlParser {
                 }
 
                 if (tokens.get(3).equals("(")){
+                    col_name = new ArrayList<>();
                     for (int i = 4; i < values_index; i++){
                         String token = tokens.get(i);
                         if (token.equals(")")){
