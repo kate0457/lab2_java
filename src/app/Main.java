@@ -3,10 +3,7 @@ import core.*;
 import sql.*;
 import types.*;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.io.File;                //для выбора файликов
 public class Main {
     private static String file_name = "";
@@ -73,7 +70,7 @@ public class Main {
                         file_name = load_file.getAbsolutePath();
                         DataBase load_bd = DataBase.load(file_name);                      //пытаемся загрузить бд
                         if(load_bd == null){
-                            System.out.println("ошибка, неудалось открыть базу данных");
+                            System.out.println("ошибка, не удалось открыть базу данных");
                             System.out.println("возможно файл имеет неверный формат (например SQLite) или поврежден");
                             System.out.println("откройте файл с правильным форматом или создайте новую бд, нажав 0");
                         }
@@ -89,6 +86,69 @@ public class Main {
                     System.out.println("нужно ввести число, а не букву или слова");
                 }
             }
+        }
+
+        System.out.println("можете вводить SQL запросы.\nдля выхода введите exit");
+        while(true){
+            System.out.println(file_name.replace(".db", ""));
+            String sql_promt = scaner.nextLine().trim();
+            if(sql_promt.equalsIgnoreCase("exit") || sql_promt.equalsIgnoreCase("exit;")){
+                System.out.println("работа завершена");
+                break;
+            }
+
+            if(sql_promt.isEmpty()){
+                continue;
+            }
+
+            try{
+                SqlCommand command = parser.parse(sql_promt);
+                String table_name = command.getTableName();
+                Table table = bd.get_table(table_name);
+
+                if(command instanceof Create){                  //обработка CREATE
+                    if(table != null){
+                        throw new IllegalArgumentException("ошибка: таблица " + table_name + " уже существует");
+                    }
+
+                    Create create_cmd = (Create) command;       //делаем command конкретно классом create, a не sqlcommand
+                    TableStruct struct = new TableStruct(table_name);
+                    List<String> names = create_cmd.getColumnName();
+                    List<String> types = create_cmd.getColumnType();
+
+                    for(int i = 0; i < names.size(); i++){
+                        String col_name = names.get(i);
+                        String col_type = types.get(i);
+                        DataType type = resolveType(col_type);
+                        boolean isprimary_key = (i == 0);
+                        struct.add_column(new Column(col_name, type, isprimary_key));
+                    }
+                    bd.add_table(new Table(struct));
+                    System.out.println("таблица " + table_name + " успешно создана");
+                    bd.save(file_name);
+                    continue;
+                }
+            }
+            catch (Exception e){
+                System.out.println("пока не доделала" + e.getMessage());
+            }
+        }
+    }
+
+    private static DataType resolveType(String type){
+        switch(type.toLowerCase()){
+            case "int":
+                return new Int();
+            case "string":
+                return new Str();
+            case "str":
+                return new Str();
+            case "double":
+                return new Doub();
+            case "bool":
+                return new Bool();
+            default:
+                throw new IllegalArgumentException("ошибка: неизвестный тип данных");
         }
     }
 }
