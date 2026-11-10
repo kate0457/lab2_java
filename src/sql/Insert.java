@@ -17,7 +17,11 @@ public class Insert implements SqlCommand{
         return table_name;
     }
 
-    public List<String> getRawvalues(){
+    public List<String> getRawValues(){
         return raw_val;
+    }
+
+    public List<String> getColumnsName(){
+        return col_name;
     }
 }
