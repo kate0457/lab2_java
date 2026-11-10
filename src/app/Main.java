@@ -128,6 +128,45 @@ public class Main {
                     bd.save(file_name);
                     continue;
                 }
+
+                if(table == null){                  //проверяем для всех остальных команд, кроме CREATE, что таблица существует и можем с ней без вреда программе работать с другими запросами
+                    throw new IllegalArgumentException("ошибка: таблица " + table_name + " не найдена в базе данных");
+                }
+
+                if(command instanceof Insert){      //начинаем выполнение INSERT
+                    Insert insert_cmd = (Insert) command;
+                    List<String> row_val = insert_cmd.getRawValues();
+                    List<String> specific_col = insert_cmd.getColumnsName();
+                    Row new_row = new Row();
+                    List<Column> all_col = table.get_struct().get_columns();
+                    if(specific_col != null && !specific_col.isEmpty()){
+                        if(specific_col.size() != row_val.size()){
+                            throw new IllegalArgumentException("ошибка: количество колонок не совпадает с переданными значениями");
+                        }
+                        for(int i = 0; i < specific_col.size(); i++){
+                            String col_name = specific_col.get(i);
+                            Column column = table.get_struct().get_column(col_name);
+                            if(column == null){
+                                throw  new IllegalArgumentException("ошибка: колонки " + col_name + " не существует");
+                            }
+                            Object parse_val = column.get_type().parse(row_val.get(i));
+                            new_row.put(col_name, parse_val);
+                        }
+                    }
+                    else{
+                        if(row_val.size() != all_col.size()){
+                            throw new IllegalArgumentException("ошибка: количество колонок не совпадает с переданными значениями");
+                        }
+                        for(int i = 0; i < all_col.size();  i++){
+                            Column column = all_col.get(i);
+                            Object parse_val = column.get_type().parse(row_val.get(i));
+                            new_row.put(column.get_name(), parse_val);
+                        }
+                    }
+                    table.insert(new_row);
+                    System.out.println("запись успешно добавлена");
+                    bd.save(file_name);
+                }
             }
             catch (Exception e){
                 System.out.println("пока не доделала" + e.getMessage());
