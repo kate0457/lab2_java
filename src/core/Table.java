@@ -3,6 +3,7 @@ package core;
 import java.io.Serializable; //для сохранения на диск (сериализация)
 import java.util.ArrayList; //динамический массив
 import java.util.List;  //для хранения колонок
+import java.util.function.Predicate; //для фильтрации через where
 
 //сама таблица с данными
 //тут хранятся строки и проверяется уникальность id
@@ -28,6 +29,22 @@ public class Table implements Serializable{
     //вовращ копию списка всех строк таблицы
     public List<Row> select_all() {
         return rows;
+    }
+
+
+    //фильтровать строки по условию
+    public List<Row> select_where(Predicate<Row> condition){
+        List<Row> rows_where = new ArrayList<>();
+
+        for (int i=0; i < rows.size(); i++){
+            Row row = rows.get(i);
+
+            //если строка подходит под условие (condition вернул true) - добавляем её
+            if (condition.test(row)) {
+                result.add(row);
+            }
+        }
+        return result;
     }
 
     //тут щас сложно
