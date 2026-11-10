@@ -2,7 +2,7 @@ package core;
 
 import java.io.Serializable; //для сохранения на диск
 import java.util.Map;   //хранит пары ключ-значение
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 
 //класс для одной строки данный
@@ -11,7 +11,7 @@ public class Row implements Serializable {
 
     //конструктор
     public Row() {
-        this.values = new HashMap<>(); //создаем пустой словарь
+        this.values = new LinkedHashMap<>(); //создаем пустой словарь
     }
 
     //добавить значение в строку (в ячейку)
