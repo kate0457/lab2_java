@@ -203,6 +203,19 @@ public class Main {
                     }
                     System.out.println("всего найдено строк: " + matched_row.size());
                 }
+
+                else if(command instanceof Update){
+                    Update update_cmd = (Update) command;
+                    Map<String, String> update_val = update_cmd.getUpdateValues();
+                    List<Where.SingleCondition> conditions = null;
+                    List<String> log_oper = null;
+                    if(update_cmd.getCondition() != null){
+                        conditions = update_cmd.getCondition().getConditions();
+                        log_oper = update_cmd.getCondition().getLogicalOperator();
+                    }
+                    table.update_rows(update_val, conditions, log_oper);
+                    bd.save(file_name);
+                }
             }
             catch (Exception e){
                 System.out.println("пока не доделала" + e.getMessage());
