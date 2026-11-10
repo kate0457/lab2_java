@@ -168,39 +168,34 @@ public class Table implements Serializable{
 
 
     //обновление строк по условию
-    public int update_where(Predicate<Row> condition, Map<String, Object> new_values){
+    public int update_rows(List<Row> rows_to_update, Map<String, Object> new_values) {
         int updated_count = 0;
-        for (int i = 0; i < rows.size(); i++){
-            Row row = rows.get(i);
-
-            //проверяем что строка подходит под условие
-            if (condition.test(row)){
-                //идем по всем подходящим под условие значениям
-                for (Map.Entry<String, Object> entry  : new_values.entrySet()){
-                    String column_name = entry.getKey();
-                    Object new_value = entry.getValue();
-                    row.put(column_name, new_value); //меняем значение в строке
+        for (Row row : rows_to_update) {
+            //если эта строка реально есть в таблице
+            if (rows.contains(row)) {
+                for (String col_name : new_values.keySet()) {
+                    row.put(col_name, new_values.get(col_name));
                 }
                 updated_count++;
             }
         }
-        return updated_count; // Возвращаем, сколько строк обновили
+        return updated_count;
     }
 
-    //удалить строку по условию
-    public int delete_where(Predicate<Row> condition){
-        int deleted_count = 0;
 
-        //идем с конца
+    //удалить строку по условию
+    public int delete_rows(List<Row> rows_to_delete) {
+        int deleted_count = 0;
         for (int i = rows.size() - 1; i >= 0; i--) {
             Row row = rows.get(i);
-            if (condition.test(row)) {
+
+            //если эта строка есть в списке на удаление
+            if (rows_to_delete.contains(row)) {
                 rows.remove(i);
                 deleted_count++;
             }
         }
         return deleted_count;
     }
-
 
 }
