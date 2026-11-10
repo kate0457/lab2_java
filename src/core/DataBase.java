@@ -79,4 +79,13 @@ public class DataBase implements Serializable{
         }
     }
 
+
+    //удаление таблицы из базы
+    public void drop_table(String table_name) {
+        if (tables.containsKey(table_name)) {
+            tables.remove(table_name);
+        } else {
+            throw new IllegalArgumentException("Ошибка: таблицы " + table_name + " не существует!");
+        }
+    }
 }
