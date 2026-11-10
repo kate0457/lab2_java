@@ -4,6 +4,7 @@ import java.io.Serializable; //для сохранения на диск (сер
 import java.util.ArrayList; //динамический массив
 import java.util.List;  //для хранения колонок
 import java.util.function.Predicate; //для фильтрации через where
+import java.util.Map;
 
 //сама таблица с данными
 //тут хранятся строки и проверяется уникальность id
@@ -164,5 +165,42 @@ public class Table implements Serializable{
 
         return false;
     }
+
+
+    //обновление строк по условию
+    public int update_where(Predicate<Row> condition, Map<String, Object> new_values){
+        int updated_count = 0;
+        for (int i = 0; i < rows.size(); i++){
+            Row row = rows.get(i);
+
+            //проверяем что строка подходит под условие
+            if (condition.test(row)){
+                //идем по всем подходящим под условие значениям
+                for (Map.Entry<String, Object> entry  : new_values.entrySet()){
+                    String column_name = entry.getKey();
+                    Object new_value = entry.getValue();
+                    row.put(column_name, new_value); //меняем значение в строке
+                }
+                updated_count++;
+            }
+        }
+        return updated_count; // Возвращаем, сколько строк обновили
+    }
+
+    //удалить строку по условию
+    public int delete_where(Predicate<Row> condition){
+        int deleted_count = 0;
+
+        //идем с конца
+        for (int i = rows.size() - 1; i >= 0; i--) {
+            Row row = rows.get(i);
+            if (condition.test(row)) {
+                rows.remove(i);
+                deleted_count++;
+            }
+        }
+        return deleted_count;
+    }
+
 
 }
