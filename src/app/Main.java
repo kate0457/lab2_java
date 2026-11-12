@@ -5,6 +5,9 @@ import types.*;
 
 import java.util.*;
 import java.io.File;                //для выбора файликов
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 public class Main {
     private static String file_name = "";                                       //название файла, с которым мы будем работать
     public static void main(String[] args) {
@@ -41,12 +44,13 @@ public class Main {
         List<String> db_files = new ArrayList<>();
 
         if(files != null && files.length > 0){              //создаем список названий файлов, если они есть
-            System.out.println("Найдены существующие базы данных:");
+            System.out.println(GREEN + "Найдены существующие базы данных:" + RESET);
             for(int i = 0; i < files.length; i++){
                 db_files.add(files[i].getName());
-                System.out.println((i + 1) + ". " + files[i].getName());
+                System.out.println((i + 1) + ". " + CYAN + files[i].getName() + RESET);
             }
-            System.out.println("\nВыберите номер базы данных для работы или введите 0 для создания новой");
+            System.out.println("--------------------------------------------------");
+            System.out.println(GREEN + "Выберите номер базы данных" + RESET + " для работы ИЛИ введите " + GREEN + "0" + RESET + " для создания новой\n");
         }
         else{
             System.out.println("Не удалось найти существующих баз данных\nВведите 0 для создания новой: ");
@@ -76,7 +80,11 @@ public class Main {
 
                 if (already_exists) {
                     System.out.println(RED + "Ошибка: база данных с именем '" + newdb_name + "' уже существует!" + RESET);
-                    System.out.println("Попробуйте ввести другое имя или выберите существующую базу из списка.\n");
+                    System.out.println("\n" + CYAN + "Вы можете:" + RESET);
+                    System.out.println(" 1. Ввести " + CYAN + "другое имя" + RESET + " для новой базы данных");
+                    System.out.println(" 2. Ввести " + CYAN + "номер" + RESET + " существующей базы из списка выше\n");
+
+                    //System.out.println("Попробуйте ввести другое имя или выберите существующую базу из списка.\n");
                     continue; //возвращаемся в начало цикла и просим ввести выбор заново
                 }
 
@@ -113,7 +121,7 @@ public class Main {
             }
         }
 
-
+        System.out.println();
         //выводим список доступных таблиц
         List<String> tableNames = bd.get_table_names();
 
@@ -215,37 +223,69 @@ public class Main {
                     bd.save(file_name);                                             //сохраняем
                 }
 
-                else if(command instanceof Select){                                 //обрабатываем SELECT
+                else if(command instanceof Select){
                     Select select_cmd = (Select) command;
-                    List<String> target_col = select_cmd.getFilterColumnName();
-                    List<Where.SingleCondition> conditions = null;                  //null здесь и в следующей строчке, тк блока WHEER может и не быть
-                    List<String> log_oper = null;
-                    if(select_cmd.getCondition() != null){                          //если WHERE есть, то заполняем нужные списки
-                        conditions = select_cmd.getCondition().getConditions();
-                        log_oper = select_cmd.getCondition().getLogicalOperator();
+                    List<String> target_col = select_cmd.getFilterColumnName(); //получаем список колонок, которые пользователь хочет увидеть
+                    List<Where.SingleCondition> conditions = null;              //по умолчанию условий нет
+                    List<String> log_oper = null;                                //по умолчанию логических операторов (and/or) нет
+                    if(select_cmd.getCondition() != null){                      //если в запросе был блок where
+                        conditions = select_cmd.getCondition().getConditions(); //достаем список условий
+                        log_oper = select_cmd.getCondition().getLogicalOperator();  //достаем логические связки
                     }
-                    List<Row> matched_row = table.execute_select(target_col, conditions, log_oper);     //отбираем столбцы
-                    System.out.println("--- Результат запроса " + CYAN + "SELECT" + RESET + " ---");
-                    if(target_col.isEmpty() || target_col.contains("*")){                               //если пришло SELECT *, просто все выводим и хватит
-                        for(Row row : matched_row){
-                            System.out.println(row);
-                        }
-                    }
-                    else{                                                                               //если нужны какие-то конкретные столбцы
-                        for(Row row : matched_row){
-                            StringBuilder row_output = new StringBuilder("{");      //для красивой строчки
-                            for(int i = 0; i < target_col.size(); i++){
-                                String col_name = target_col.get(i);
-                                if(table.get_struct().get_column(col_name) == null){
-                                    throw new IllegalArgumentException("Ошибка: колонка " + col_name + " не найдена");
-                                }
-                                row_output.append(col_name).append("=").append(row.get(col_name));
-                                if(i < target_col.size() - 1){
-                                    row_output.append(", ");
-                                }
+
+                    //вызываем метод таблицы, который вернет отфильтрованные строки
+                    List<Row> matched_row = table.execute_select(target_col, conditions, log_oper);
+
+                    System.out.println("\n" + "--- Результат запроса " + CYAN + "SELECT" +RESET+ " ---" ); //чутьчуть эстетики
+
+                    if (matched_row.isEmpty()) {                    //если после фильтрации ничего не осталось
+                        System.out.println("Строки не найдены.");
+                    } else {                                        //если строки есть, начинаем их красиво выводить
+                        //создаем список колонок, которые будем печатать
+                        List<Column> cols_to_print = new ArrayList<>();
+                        if (target_col.isEmpty() || target_col.contains("*")) {         //если запросили все колонки (звездочка)
+                            cols_to_print = table.get_struct().get_columns();
+                        } else {    //если запросили конкретные колонки (например, name, position)
+                            for (String colName : target_col) {
+                                Column c = table.get_struct().get_column(colName);      //ищем колонку по имени в таблице
+                                if (c != null) cols_to_print.add(c);                    //если нашли, добавляем в список на печать
                             }
-                            row_output.append("}");
-                            System.out.println(row_output);
+                        }
+
+                        //печатаем имя колонки, выделяя под него 15 символов
+                        for (Column col : cols_to_print) {
+                            System.out.printf(CYAN + "%-15s" + RESET, col.get_name());
+                        }
+                        System.out.println(); //перевод строки
+
+                        //раздельная линия
+                        for (int i = 0; i < cols_to_print.size() * 15; i++) System.out.print("-");
+                        System.out.println();
+
+                        //перебираем все найденные строки
+                        for (Row row : matched_row) {
+                            for (Column col : cols_to_print) {
+                                //значение из ячейки текущей строки
+                                Object val = row.get(col.get_name());
+                                String str_val = "";
+
+                                //проверяем, является ли значение датой
+                                if (val instanceof java.time.LocalDate) {
+                                    //да? переводим её в нужный формат (дд.мм.гггг)
+                                    java.time.LocalDate date_val = (java.time.LocalDate) val;
+                                    java.time.format.DateTimeFormatter fmt = java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy");
+                                    str_val = date_val.format(fmt);
+                                } else {
+                                    //нет? просто превращаем в строку
+                                    str_val = String.valueOf(val);
+                                }
+
+                                //печатаем значение в поле шириной 15 символов
+                                System.out.printf("%-15s", str_val);
+                            }
+
+                            //после вывода всех колонок одной строки переходим на новую строку
+                            System.out.println();
                         }
                     }
                     System.out.println("Всего найдено строк: " + matched_row.size() + "\n");
@@ -309,7 +349,7 @@ public class Main {
             case "data":
                 return new DateT();
             default:
-                throw new IllegalArgumentException("ошибка: неизвестный тип данных");
+                throw new IllegalArgumentException("Ошибка: неизвестный тип данных");
         }
     }
 }
