@@ -118,6 +118,27 @@ public class Table implements Serializable{
             }
         }
 
+
+        Column pk = struct.get_primary_key();
+        if (pk != null) {
+            String pkName = pk.get_name();
+            resultList.sort((row1, row2) -> {
+                Object val1 = row1.get(pkName);
+                Object val2 = row2.get(pkName);
+
+                // Если оба значения — числа, сравниваем их как числа
+                if (val1 instanceof Integer && val2 instanceof Integer) {
+                    return ((Integer) val1).compareTo((Integer) val2);
+                }
+                // Если оба значения — строки, сравниваем их как строки
+                else if (val1 instanceof String && val2 instanceof String) {
+                    return ((String) val1).compareTo((String) val2);
+                }
+                // В остальных случаях оставляем как есть
+                return 0;
+            });
+        }
+
         return resultList;
     }
 

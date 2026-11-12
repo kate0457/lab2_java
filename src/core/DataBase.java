@@ -2,11 +2,16 @@ package core;
 import java.io.*; //инструменты для работы с файлами (ввод/вывод)
 import java.util.HashMap; //реализация словаря (хэш-таблица)
 import java.util.Map; //хранит пары имя-объект
+import java.util.List;
+import java.util.ArrayList;
 
 
 //который хранит в себе все таблицы
 //отвечает за сохранение в файл и загрузку из файла
 public class DataBase implements Serializable{
+    private static final String CYAN  = "\u001B[36m";
+    private static final String RESET = "\u001B[0m";
+
     private Map<String, Table> tables; //словарь со всеми таблицами
 
     //конструктор
@@ -40,7 +45,9 @@ public class DataBase implements Serializable{
             //теперь все закрываем чтобы ничего не мешало, суету не наводило
             out.close();
             file.close();
-            System.out.println("База данных успешно сохранена в " + file_name);
+
+            File f = new File(file_name);
+            System.out.println("База данных успешно сохранена в файл " + f.getName());
 
         } catch (IOException  e){
             System.out.println("Ошибка при сохранении: " + e.getMessage());
@@ -65,7 +72,8 @@ public class DataBase implements Serializable{
             in.close();
             file.close();
 
-            System.out.println("База данных успешно загружена из " + file_name);
+            File f = new File(file_name);
+            System.out.println("База данных успешно загружена из " + CYAN + f.getName() + RESET);
             return db;
         } catch (FileNotFoundException e){
             System.out.println("Файл базы данных не найден. Будет создана новая база.");
@@ -74,7 +82,7 @@ public class DataBase implements Serializable{
             System.out.println("Ошибка при загрузке (класс не найден): " + e.getMessage());
             return null;
         } catch (IOException e) {
-            System.out.println("Ошибка при загрузке (ввод/вывод ): " + e.getMessage());
+            System.out.println("Ошибка при загрузке (ввод/вывод): " + e.getMessage());
             return null;
         }
     }
@@ -87,5 +95,14 @@ public class DataBase implements Serializable{
         } else {
             throw new IllegalArgumentException("Ошибка: таблицы " + table_name + " не существует!");
         }
+    }
+
+    //получить список имен всех таблиц в базе
+    public List<String> get_table_names() {
+        List<String> names = new ArrayList<>();
+        for (String table_name : tables.keySet()) {
+            names.add(table_name);
+        }
+        return names;
     }
 }

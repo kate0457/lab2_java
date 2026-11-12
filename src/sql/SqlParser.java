@@ -24,7 +24,7 @@ public class SqlParser {
     public SqlCommand parse(String promt){                                                                            //функция, которая конкретно осознает что за запрос и что с ним надо делать, чтоб дальше в core и в app все работало
         List<String> tokens = tokenize(promt);
         if (tokens.isEmpty()){
-            throw new UnsupportedOperationException("вы ввели пустоту");
+            throw new UnsupportedOperationException("Вы ввели пустоту");
         }
         String first_word = tokens.getFirst().toUpperCase();                                                          //берем первое слово, тк у всех наших команд оно разное и по нему оч удобно различать команды
         switch (first_word){
@@ -87,7 +87,7 @@ public class SqlParser {
                                         cond.add(new Where.SingleCondition(next_col_name, next_operator, next_value));
                                     }
                                     else{
-                                        throw new IllegalArgumentException("Неполное условие после оператора ");      //если не дописали условие, то вылезает вот эта ошибка
+                                        throw new IllegalArgumentException("Неполное условие после оператора " + tokens.get(i));      //если не дописали условие, то вылезает вот эта ошибка
                                     }
                                 }
                                 else{
@@ -133,7 +133,7 @@ public class SqlParser {
                                         cond.add(new Where.SingleCondition(next_col_name, next_operator, next_value));
                                     }
                                     else{
-                                        throw new IllegalArgumentException("Неполное условие после оператора ");
+                                        throw new IllegalArgumentException("Неполное условие после оператора " + tokens.get(i));
                                     }
                                 }
                                 else{
@@ -173,7 +173,7 @@ public class SqlParser {
                                         cond.add(new Where.SingleCondition(next_col_name, next_operator, next_value));
                                     }
                                     else{
-                                        throw new IllegalArgumentException("Неполное условие после оператора ");
+                                        throw new IllegalArgumentException("Неполное условие после оператора " + tokens.get(i));
                                     }
                                 }
                                 else{
@@ -216,7 +216,7 @@ public class SqlParser {
                                     cond.add(new Where.SingleCondition(next_col_name, next_operator, next_value));
                                 }
                                 else{
-                                    throw new IllegalArgumentException("Неполное условие после оператора ");
+                                    throw new IllegalArgumentException("Неполное условие после оператора " + tokens.get(i));
                                 }
                             }
                             else{
@@ -249,7 +249,7 @@ public class SqlParser {
                 String table_name = tokens.get(2);
                 return new Drop(table_name);                                                                          //для нее нужно лишь название таблицы
             default:                                                                                                  //если какие-то другие команды, для которых мы не написали реализации, выводится сообщение
-                throw new UnsupportedOperationException("Команда еще не реализована");
+                throw new UnsupportedOperationException("Команда еще не реализована, следите за обновлениями!:)");
         }
     }
 }
