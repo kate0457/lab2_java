@@ -21,13 +21,13 @@ public class DataBase implements Serializable{
 
     //добавить новую таблицу в базу
     public void add_table(Table table) {
-        String name = table.get_struct().get_table_name();
+        String name = table.get_struct().get_table_name().trim().toLowerCase();
         tables.put(name, table);
     }
 
     //получить таблицу по имени
     public Table get_table(String table_name) {
-        return tables.get(table_name);
+        return tables.get(table_name.trim().toLowerCase());
     }
 
 
@@ -47,7 +47,7 @@ public class DataBase implements Serializable{
             file.close();
 
             File f = new File(file_name);
-            System.out.println("База данных успешно сохранена в файл " + f.getName());
+            //System.out.println("База данных успешно сохранена в файл " + f.getName());
 
         } catch (IOException  e){
             System.out.println("Ошибка при сохранении: " + e.getMessage());
@@ -90,8 +90,8 @@ public class DataBase implements Serializable{
 
     //удаление таблицы из базы
     public void drop_table(String table_name) {
-        if (tables.containsKey(table_name)) {
-            tables.remove(table_name);
+        if (tables.containsKey(table_name.trim().toLowerCase())) {
+            tables.remove(table_name.trim().toLowerCase());
         } else {
             throw new IllegalArgumentException("Ошибка: таблицы " + table_name + " не существует!");
         }

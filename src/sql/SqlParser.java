@@ -29,7 +29,7 @@ public class SqlParser {
         String first_word = tokens.getFirst().toUpperCase();                                                          //берем первое слово, тк у всех наших команд оно разное и по нему оч удобно различать команды
         switch (first_word){
             case "INSERT": {                                                                                          //разбираем insert
-                String table_name = tokens.get(2);                                                                    //берем имя таблицы, так как это единственный обязательный атрибут дял всех команд
+                String table_name = tokens.get(2).trim();                                                                    //берем имя таблицы, так как это единственный обязательный атрибут дял всех команд
                 List<String> raw_val = new ArrayList<>();
                 List<String> col_name = null;
                 int values_index = 0;
@@ -66,7 +66,7 @@ public class SqlParser {
             }
             case "SELECT":{                                                                                           //разбираем SELECT
                 if (tokens.get(1).equals("*")){                                                                       //если нужно достать все столбцы
-                    String table_name = tokens.get(3);
+                    String table_name = tokens.get(3).trim();
                     Where final_cond = null;                                                                          //блок WHERE по-умолчанию делаем null, тк не везде это условие может быть
                     if (tokens.size() > 4 && tokens.get(4).toUpperCase().equals("WHERE")){                            //если все-таки условия на отбор есть
                         List<Where.SingleCondition> cond = new ArrayList<>();
@@ -144,11 +144,11 @@ public class SqlParser {
                         }
                         final_cond = new Where(cond, log_op);
                     }
-                    return new Select(tokens.get(index + 1), col, final_cond);
+                    return new Select(tokens.get(index + 1).trim(), col, final_cond);
                 }
             }
             case "UPDATE":{                                                                                           //обрабатываем UPDATE
-                String table_name = tokens.get(1);
+                String table_name = tokens.get(1).trim();
                 Map<String, String> update_val = new HashMap<>();
                 Where final_cond = null;
                 int i = 3;                                                                                            //с 3 индекса, потому что скипаем UPDATE название_таблицы SET
@@ -195,7 +195,7 @@ public class SqlParser {
                 return new Update(table_name, update_val, final_cond);                                                //получаем готовый объект Uodate, с которым можно дальше работать
             }
             case "DELETE": {                                                                                          //разбираем запрос с DELETE
-                String table_name = tokens.get(2);
+                String table_name = tokens.get(2).trim();
                 Where final_cond = null;
                 if (tokens.get(3).toUpperCase().equals("WHERE") && tokens.size() > 6){                                //как и везде разбираем запрос с блоком WHERE
                     List<Where.SingleCondition> cond = new ArrayList<>();
@@ -230,7 +230,7 @@ public class SqlParser {
                 return new Delete(table_name, final_cond);                                                            //получаем объект класса DELETE
             }
             case "CREATE":{                                                                                           //работает с запросом CREATE
-                String table_name = tokens.get(2);
+                String table_name = tokens.get(2).trim();
                 List<String> col_name = new ArrayList<>();
                 List<String> col_type = new ArrayList<>();
                 int i = 4;                                                                                            //начинаем с 4, тк пропускаем CREATE TABLE название_таблицы (
@@ -246,7 +246,7 @@ public class SqlParser {
                 return new Create(table_name, col_name, col_type);                                                    //готовый разобранный CREATE
             }
             case "DROP":                                                                                              //разбираем запрос с командой DROP
-                String table_name = tokens.get(2);
+                String table_name = tokens.get(2).trim();
                 return new Drop(table_name);                                                                          //для нее нужно лишь название таблицы
             default:                                                                                                  //если какие-то другие команды, для которых мы не написали реализации, выводится сообщение
                 throw new UnsupportedOperationException("Команда еще не реализована, следите за обновлениями!:)");

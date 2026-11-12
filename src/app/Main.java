@@ -12,6 +12,7 @@ public class Main {
         String CYAN   = "\u001B[36m";
         String YELLOW = "\u001B[33m";
         String RESET  = "\u001B[0m";
+        String RED    = "\u001B[31m";
 
         Scanner scaner = new Scanner(System.in);                                //штука для принятия строк с клавиатуры
         SqlParser parser = new SqlParser();                                     //создаем парсер, чтоб обрабатывать введенные строки
@@ -58,14 +59,33 @@ public class Main {
             if(choice.equals("0")){     //если 0, создаем новую бд
                 System.out.println("Введите имя новой базы данных:");
                 String newdb_name = scaner.nextLine().trim();
-                if(!newdb_name.endsWith(".db")){
+
+                //добавляем .db, если нет
+                if(!newdb_name.toLowerCase().endsWith(".db")){
                     newdb_name += ".db";
                 }
+
+                //нет ли уже файла с таким именем (без учета регистра)
+                boolean already_exists = false;
+                for (String existing_file : db_files) {
+                    if (existing_file.equalsIgnoreCase(newdb_name)) {
+                        already_exists = true;
+                        break;
+                    }
+                }
+
+                if (already_exists) {
+                    System.out.println(RED + "Ошибка: база данных с именем '" + newdb_name + "' уже существует!" + RESET);
+                    System.out.println("Попробуйте ввести другое имя или выберите существующую базу из списка.\n");
+                    continue; //возвращаемся в начало цикла и просим ввести выбор заново
+                }
+
+                //если проверка прошла, создаем файл
                 File newbd_file = new File(cur_dir, newdb_name);
                 file_name = newbd_file.getAbsolutePath();
                 bd = new DataBase();
                 bd.save(file_name);
-                System.out.println("Создана новая база данных " + newdb_name);
+                System.out.println(GREEN + "Создана новая база данных " + CYAN + newdb_name + RESET);
             }
             else{                       //остальные циферки и буковки
                 try {
@@ -120,7 +140,7 @@ public class Main {
 
             String sql_promt = scaner.nextLine().trim();
             if(sql_promt.equalsIgnoreCase("exit") || sql_promt.equalsIgnoreCase("exit;")){
-                System.out.println("Работа завершена. Хорошего дня!");
+                System.out.println("\n" + GREEN + "Работа завершена. Хорошего дня!" + RESET);
                 break;
             }
 
@@ -191,7 +211,7 @@ public class Main {
                         }
                     }
                     table.insert(new_row);                                          //добавляем в таблицу обработанную строку
-                    System.out.println("Запись успешно добавлена");
+                    System.out.println(GREEN + "Запись успешно добавлена" + RESET);
                     bd.save(file_name);                                             //сохраняем
                 }
 
@@ -205,7 +225,7 @@ public class Main {
                         log_oper = select_cmd.getCondition().getLogicalOperator();
                     }
                     List<Row> matched_row = table.execute_select(target_col, conditions, log_oper);     //отбираем столбцы
-                    System.out.println("Результат выполнения SELECT");
+                    System.out.println("--- Результат запроса " + CYAN + "SELECT" + RESET + " ---");
                     if(target_col.isEmpty() || target_col.contains("*")){                               //если пришло SELECT *, просто все выводим и хватит
                         for(Row row : matched_row){
                             System.out.println(row);
@@ -228,7 +248,7 @@ public class Main {
                             System.out.println(row_output);
                         }
                     }
-                    System.out.println("Всего найдено строк: " + matched_row.size());
+                    System.out.println("Всего найдено строк: " + matched_row.size() + "\n");
                 }
 
                 else if(command instanceof Update){                                     //обрабатываем UPDATE
@@ -269,7 +289,7 @@ public class Main {
                 }
             }
             catch (Exception e){
-                System.out.println(e.getMessage());
+                System.out.println(RED + e.getMessage() + RESET);
             }
         }
     }
