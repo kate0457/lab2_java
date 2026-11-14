@@ -8,6 +8,11 @@ import java.io.File;                //для выбора файликов
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Главный класс приложения. Содержит консольный интерфейс для взаимодействия
+ * с пользователем и связывает воедино парсер запросов и ядро базы данных.
+ */
+
 public class Main {
     private static String file_name = "";                                       //название файла, с которым мы будем работать
     public static void main(String[] args) {
@@ -31,7 +36,7 @@ public class Main {
                 input_path = ".";
             }
 
-            File check_dir = new File(input_path);                              //сразу не записываем в cur_dir, тк пользователь может ввести неусуществующую ерунду
+            File check_dir = new File(input_path);                              //сразу не записываем в cur_dir, тк пользователь может ввести несуществующую ерунду
             if(check_dir.exists() && check_dir.isDirectory()){                  //если не ерунда и путь действительно существует, то работаем с путем, иначе выводим сообщение об ошибке и снова запрашиваем путь
                 cur_dir = check_dir;
             }
@@ -91,8 +96,6 @@ public class Main {
                     System.out.println("\n" + CYAN + "Вы можете:" + RESET);
                     System.out.println(" 1. Ввести " + CYAN + "другое имя" + RESET + " для новой базы данных");
                     System.out.println(" 2. Ввести " + CYAN + "номер" + RESET + " существующей базы из списка выше");
-
-                    //System.out.println("Попробуйте ввести другое имя или выберите существующую базу из списка.\n");
                     continue; //возвращаемся в начало цикла и просим ввести выбор заново
                 }
 
