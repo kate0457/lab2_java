@@ -339,7 +339,15 @@ public class Main {
         }
     }
 
-    private static DataType resolveType(String type){                                       //из строчек делаем тип данных
+    /**
+     * Преобразует строковое название типа данных (из SQL-запроса) в соответствующий объект Java
+     *
+     * @param type строковое название типа данных (например, "int", "string", "double")
+     * @return объект DataType, соответствующий запрошенному типу
+     * @throws IllegalArgumentException если передан неизвестный или неподдерживаемый тип данных
+     */
+
+    private static DataType resolveType(String type){
         switch(type.toLowerCase()){
             case "int":
                 return new Int();
