@@ -7,7 +7,10 @@ import java.time.LocalDate;                  //импорт для даты
 import java.time.format.DateTimeFormatter;  //импорт для форматирования
 
 
-//класс для одной строки данный
+/**
+ * Класс представляет одну запись (строку) в таблице базы данных.
+ * Внутри хранит значения в формате "имя колонки -> значение ячейки".
+ */
 public class Row implements Serializable {
     private Map<String, Object> values; //храниние данных каждой строки в формате словаря
 
