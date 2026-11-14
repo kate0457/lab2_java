@@ -4,7 +4,19 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Парсер SQL запросов.
+ * Преобразует текстовую строку (например, "SELECT * FROM pets;")
+ * в объекты команд (SqlCommand), с которыми работает ядро базы данных.
+ */
 public class SqlParser {
+    /**
+     * Разбивает строку запроса на отдельные токены (слова, числа, символы).
+     * Учитывает строки в кавычках как единое целое.
+     *
+     * @param promt исходная строка запроса
+     * @return список токенов
+     */
     List<String> tokenize(String promt){                                                                              //разделяем запрос на отдельные слова
         final Pattern token_patern = Pattern.compile("'[^']*'|\"[^\"]*\"|[a-zA-Z0-9_.]+|[<>=!]+|[()*]");        //маска для поиска слов в запросе, при чем если передать имя фамилию в кавычках, это распознается как одно слово
 
@@ -21,6 +33,15 @@ public class SqlParser {
         return tokens;
     }
 
+
+    /**
+     * Разбирает строку SQL-запроса и возвращает соответствующую команду.
+     *
+     * @param promt текст SQL-запроса от пользователя
+     * @return объект команды (Insert, Select, Update, Delete, Create или Drop)
+     * @throws UnsupportedOperationException если введена пустая строка или неизвестная команда
+     * @throws IllegalArgumentException если нарушен синтаксис запроса (не хватает ключевых слов, скобок и т.д.)
+     */
     public SqlCommand parse(String promt){                                                                            //функция, которая конкретно осознает что за запрос и что с ним надо делать, чтоб дальше в core и в app все работало
         List<String> tokens = tokenize(promt);
         if (tokens.isEmpty()){
