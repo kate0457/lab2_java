@@ -242,7 +242,7 @@ public class Main {
                     }
 
                     //вызываем метод таблицы, который вернет отфильтрованные строки
-                    List<Row> matched_row = table.execute_select(target_col, conditions, log_oper);
+                    List<Row> matched_row = table.execute_select(conditions, log_oper);
 
                     System.out.println("\n" + "--- Результат запроса " + CYAN + "SELECT" +RESET+ " ---" ); //чутьчуть эстетики
 

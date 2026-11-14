@@ -6,8 +6,12 @@ import java.util.List;  //для хранения колонок
 import java.util.function.Predicate; //для фильтрации через where
 import java.util.Map;
 
-//сама таблица с данными
-//тут хранятся строки и проверяется уникальность id
+/**
+ * Представляет собой таблицу базы данных.
+ * Хранит структуру (список колонок) и сами данные (список строк).
+ * Обеспечивает проверку уникальности первичного ключа при вставке.
+ */
+
 public class Table implements Serializable{
     private TableStruct struct;        //какие есть колонки
     private List<Row> rows;            //список всех строк
@@ -33,7 +37,12 @@ public class Table implements Serializable{
     }
 
 
-    //фильтровать строки по условию
+    /**
+     * Фильтрует строки таблицы на основе переданного условия.
+     *
+     * @param condition условие, определяющее, должна ли строка попасть в результат
+     * @return список строк, удовлетворяющих условию
+     */
     public List<Row> select_where(Predicate<Row> condition){
         List<Row> rows_where = new ArrayList<>();
 
@@ -48,9 +57,13 @@ public class Table implements Serializable{
         return rows_where;
     }
 
-    //тут щас сложно
-    //добавление новой строки в таблицу с проверкой уникальности
-
+    /**
+     * Добавляет новую строку в таблицу.
+     * Если в таблице есть первичный ключ, проверяет его уникальность.
+     *
+     * @param new_row строка с данными для добавления
+     * @throws IllegalArgumentException если запись с таким primary key уже существует
+     */
     public void insert(Row new_row){
         Column primary_key_column = struct.get_primary_key(); //методом из Table ищем среди всех колонок таблицы первичный ключ
 
@@ -81,7 +94,16 @@ public class Table implements Serializable{
         rows.add(new_row);
     }
 
-    public List<Row> execute_select(List<String> targetColumns, List<Where.SingleCondition> conditions, List<String> logicalOperators) {
+
+    /**
+     * Выполняет выборку строк с учетом условий WHERE (аналог SQL SELECT).
+     * Результат сортируется по первичному ключу (если он есть).
+     *
+     * @param conditions список условий фильтрации (может быть null)
+     * @param logicalOperators список логических операторов and/or между условиями (может быть null)
+     * @return отфильтрованный и отсортированный список строк
+     */
+    public List<Row> execute_select(List<Where.SingleCondition> conditions, List<String> logicalOperators) {
         List<Row> resultList = new ArrayList<>();
 
         // Если блок WHERE пустой, то фильтровать нечего — возвращаем все строки таблицы целиком
@@ -142,8 +164,12 @@ public class Table implements Serializable{
         return resultList;
     }
 
+
     /**
-     * Вспомогательный метод: проверяет одну ячейку конкретной строки по одному правилу (например, price > 20000)
+     * Проверяет, удовлетворяет ли одна ячейка строки одному условию (например, price > 20000).
+     * Сравнение происходит с приведением типов на основе схемы таблицы.
+     *
+     * @throws IllegalArgumentException если указанная колонка не существует в таблице
      */
     private boolean evaluate_single_condition(Row row, Where.SingleCondition single) {
         String colName = single.getColumnName();
@@ -188,10 +214,17 @@ public class Table implements Serializable{
     }
 
 
-    //обновление строк по условию
+    /**
+     * Обновляет значения в строках таблицы на основе условий WHERE.
+     *
+     * @param updateValues карта новых значений (имя колонки -> новое значение в виде строки)
+     * @param conditions список условий фильтрации (может быть null)
+     * @param logicalOps список логических операторов and/or (может быть null)
+     * @throws IllegalArgumentException если нарушена уникальность primary key или колонка не существует
+     */
     public void update_rows(Map<String, String> updateValues, List<Where.SingleCondition> conditions, List<String> logicalOps) {
         // Ипользуем уже готовый execute_select для поиска строк, подходящих под условие
-        List<Row> targetRows = execute_select(new ArrayList<>(), conditions, logicalOps);
+        List<Row> targetRows = execute_select(conditions, logicalOps);
 
         int updatedCount = 0;
 
@@ -228,10 +261,15 @@ public class Table implements Serializable{
         System.out.println("Успешно обновлено записей: " + updatedCount);
     }
 
-    // ИСПРАВЛЕНО: Новый метод выполнения DELETE, работающий напрямую со списками условий WHERE
+    /**
+     * Удаляет строки таблицы, удовлетворяющие условиям WHERE.
+     *
+     * @param conditions список условий фильтрации (может быть null)
+     * @param logicalOps список логических операторов and/or (может быть null)
+     */
     public void execute_delete(List<Where.SingleCondition> conditions, List<String> logicalOps) {
         // Находим строки под удаление через фильтр execute_select
-        List<Row> targetRows = execute_select(new ArrayList<>(), conditions, logicalOps);
+        List<Row> targetRows = execute_select(conditions, logicalOps);
 
         // Удаляем найденные элементы из основного массива
         rows.removeAll(targetRows);

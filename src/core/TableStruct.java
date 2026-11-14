@@ -4,6 +4,10 @@ import java.io.Serializable; //для сохранения на диск (сер
 import java.util.ArrayList; //динамический массив
 import java.util.List;  //для хранения колонок
 
+/**
+ * Представляет структуру (схему) таблицы.
+ * Содержит имя таблицы и упорядоченный список её колонок.
+ */
 public class TableStruct implements Serializable{
     private String table_name;      //имя таблицы
     private List<Column> columns;   //список колонок
