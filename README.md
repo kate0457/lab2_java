@@ -1,10 +1,10 @@
 # Разработка упрощённой системы управления базами данных (СУБД) на Java
 
 ## 1. Архитектура системы
-* /types - содержит классы основных типов (Int, Doub, Str, Bool)
-* /core - классы, которые описывают таблицы и хранят данные
-* /sql - разделение принятого SQL запроса на  отдельные логические слова (SqlParser) и модель команд (Create, Drop, Insert, Select, Update, Delete, Where), реализующих единый интерфейс SqlCommand.
-* /app - точка входа Main, консольный интерфейс пользователя, выбор рабочих директорий и файлов баз данных.
+* `/types` - содержит классы основных типов (Int, Doub, Str, Bool)
+* `/core` - классы, которые описывают таблицы и хранят данные
+* `/sql` - разделение принятого SQL запроса на  отдельные логические слова (SqlParser) и модель команд (Create, Drop, Insert, Select, Update, Delete, Where), реализующих единый интерфейс SqlCommand.
+* `/app` - точка входа Main, консольный интерфейс пользователя, выбор рабочих директорий и файлов баз данных.
 
 ### Диаграмма классов (Class Diagram)
 
@@ -228,3 +228,19 @@ DROP TABLE Staff;
 
 В результате у нас получилась полностью рабочая консольная СУБД, которая надежно сохраняет данные между запусками и корректно обрабатывает все основные операции. Помимо технических навыков работы с потоками ввода-вывода, регулярными выражениями и коллекциями Java, этот проект дал нам хороший опыт командной разработки и интеграции модулей.
 В дальнейшем эту систему можно улучшить: добавить хэш-индексы для более быстрого поиска на больших объемах данных и реализовать объединение таблиц (JOIN).
+
+## 5. Список литературы
+
+* **Javadoc-комментарии** - https://ru.w3docs.com/learn-java/java-comments
+* **LocalDate** - https://www.examclouds.com/ru/java/java-core-russian/klass-localdate?ysclid=mwgjx36sq8516908158
+* **LocalDate** - https://javarush.com/quests/lectures/questsyntaxpro.level16.lecture03
+* **DateTimeFormatter** - https://javarush.com/quests/lectures/questsyntaxpro.level16.lecture07
+* **java.io.File** - https://javarush.com/groups/posts/2275-files-path
+* **listFiles** - https://www.baeldung.com/java-list-directory-files
+* **getAbsolutePath (работа с файлами)** - https://javarush.com/quests/lectures/questcollections.level01.lecture01
+* **сериализация** - https://javarush.com/groups/posts/2022-serializacija-i-deserializacija-v-java
+* **FileInputStream, FileOutputStream** - https://javarush.com/groups/posts/2020-vvod-vihvod-v-java-klassih-fileinputstream-fileoutputstream-bufferedinputstream
+* **import java.util.regex.Pattern, регулярное выражение** - https://javarush.com/groups/posts/136-reguljarnihe-vihrazhenija-v-java-chastjh-1
+* **java.util.regex.Matcher, регулярные выражения: поиск по тексту** - https://javarush.com/groups/posts/regulyarnye-vyrazheniya-v-java
+* **Java Collection Framework** - https://javarush.com/groups/posts/3986-kofe-breyk-185-podrobnoe-rukovodstvo-po-java-collection-framework
+* **лекции по Java у Максима Валентиновича**
