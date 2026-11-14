@@ -1,13 +1,16 @@
 package core;
-import java.io.*; //инструменты для работы с файлами (ввод/вывод)
-import java.util.HashMap; //реализация словаря (хэш-таблица)
-import java.util.Map; //хранит пары имя-объект
+import java.io.*;           //инструменты для работы с файлами (ввод/вывод)
+import java.util.HashMap;   //реализация словаря (хэш-таблица)
+import java.util.Map;       //хранит пары имя-объект
 import java.util.List;
 import java.util.ArrayList;
 
 
-//который хранит в себе все таблицы
-//отвечает за сохранение в файл и загрузку из файла
+/**
+ * Класс, представляющий базу данных.
+ * Хранит в себе таблицы и отвечает за их сохранение в файл (сериализация) и загрузку из файла (десериализация)
+ */
+
 public class DataBase implements Serializable{
     private static final String CYAN  = "\u001B[36m";
     private static final String RESET = "\u001B[0m";
@@ -31,19 +34,19 @@ public class DataBase implements Serializable{
     }
 
 
-    //сериализация
+    /**
+     * Сохраняет текущее состояние базы данных (все таблицы и их данные) в указанный файл.
+     *
+     * @param file_name путь к файлу, в который будет произведена запись
+     */
     public void save(String file_name){
         try{
-            //открываем файлик
-            FileOutputStream file = new FileOutputStream(file_name);
-            //преобразует в последовательность байтов и записывает в выходной поток (OutputStream)
-            ObjectOutputStream out = new ObjectOutputStream(file);
+            FileOutputStream file = new FileOutputStream(file_name);    //открываем файлик
+            ObjectOutputStream out = new ObjectOutputStream(file);      //преобразует в последовательность байтов и записывает в выходной поток (OutputStream)
 
-            //сохранить объект в файл
-            out.writeObject(this);
+            out.writeObject(this);                                      //сохранить объект в файл
 
-            //теперь все закрываем чтобы ничего не мешало, суету не наводило
-            out.close();
+            out.close();                                                //теперь все закрываем чтобы ничего не мешало, суету не наводило
             file.close();
 
             File f = new File(file_name);
@@ -54,7 +57,12 @@ public class DataBase implements Serializable{
         }
     }
 
-    //загрузить базу из файла
+    /**
+     * Загружает базу данных из указанного файла (десериализация).
+     *
+     * @param file_name путь к файлу базы данных
+     * @return загруженный объект базы данных, либо null, если файл не найден или поврежден
+     */
     public static DataBase load(String file_name){
         try{
             //FileInputStream позволяет читать данные из файла в виде последовательности байтов
@@ -88,7 +96,12 @@ public class DataBase implements Serializable{
     }
 
 
-    //удаление таблицы из базы
+    /**
+     * Удаляет таблицу из базы данных по её имени.
+     *
+     * @param table_name имя таблицы, которую нужно удалить
+     * @throws IllegalArgumentException если таблицы с таким именем не существует
+     */
     public void drop_table(String table_name) {
         if (tables.containsKey(table_name.trim().toLowerCase())) {
             tables.remove(table_name.trim().toLowerCase());
@@ -97,7 +110,11 @@ public class DataBase implements Serializable{
         }
     }
 
-    //получить список имен всех таблиц в базе
+    /**
+     * Возвращает список имен всех таблиц, которые в данный момент находятся в базе данных.
+     *
+     * @return список строк с названиями таблиц
+     */
     public List<String> get_table_names() {
         List<String> names = new ArrayList<>();
         for (String table_name : tables.keySet()) {
