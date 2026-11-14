@@ -3,6 +3,10 @@ package core;
 import types.DataType; //импортируем наш интерфейс
 import java.io.Serializable; //для сохранения на диск
 
+/**
+ * Класс представляет описание одного столбца (колонки) в таблице базы данных.
+ * Хранит имя колонки, её тип данных и признак того, является ли она первичным ключом.
+ */
 public class Column implements Serializable{
     private String name;        //имя колонки
     private DataType type;      //тип данных
@@ -26,8 +30,7 @@ public class Column implements Serializable{
         return primary_key;
     }
 
-    @Override //переопределяем метод из базового класса Object
-    //выводим данные про колокну, ее название, тип данных которые она хранит и явлеятся ли праймари
+    @Override
     public String toString(){
         return name + " (" + type.get_name() + (primary_key ? ", primary key" : "") + ")";
     }
