@@ -23,7 +23,8 @@ public class Main {
         File cur_dir = null;                                                    //null, потому что еще ничего не открыто
 
         while(cur_dir == null){         //запрашиваем у пользователя путь до папки и его обрабатываем
-            System.out.println("Введите корректный путь к папке, где лежат базы данных,\n(или нажмите Enter для выбора текущей папки):");
+            System.out.println("\n" + CYAN + "Введите корректный путь к папке, где лежат базы данных," + RESET);
+            System.out.println("(или нажмите " + CYAN + "Enter" + RESET + " для выбора текущей папки):");
             String input_path = scaner.nextLine().trim();
 
             if(input_path.isEmpty()){   //если пустая, то выбираем директорию, где лежит файл с программой
@@ -50,19 +51,26 @@ public class Main {
                 System.out.println((i + 1) + ". " + CYAN + files[i].getName() + RESET);
             }
             System.out.println("--------------------------------------------------");
-            System.out.println(GREEN + "Выберите номер базы данных" + RESET + " для работы ИЛИ введите " + GREEN + "0" + RESET + " для создания новой\n");
+            System.out.println(CYAN + "Выберите номер базы данных" + RESET + " для работы ИЛИ введите " + CYAN + "0" + RESET + " для создания новой");
         }
         else{
-            System.out.println("Не удалось найти существующих баз данных\nВведите 0 для создания новой: ");
+            System.out.println(YELLOW + "Не удалось найти существующих баз данных" + RESET);
+            System.out.println("Введите" + CYAN + " 0" + RESET + " для создания новой");
         }
 
         while (bd == null){             //выбираем что делать с веденным числом
-            System.out.println("Ваш выбор: ");
+            System.out.println("\n" + CYAN + "Введите" + RESET + " номер базы данных: ");
             String choice = scaner.nextLine().trim();
 
             if(choice.equals("0")){     //если 0, создаем новую бд
-                System.out.println("Введите имя новой базы данных:");
+                System.out.println(CYAN + "Введите" + RESET + " имя новой базы данных:");
                 String newdb_name = scaner.nextLine().trim();
+
+                //+проверка что имя бд не пустое (".db")
+                if (newdb_name.isEmpty()) {
+                    System.out.println(RED + "Ошибка: имя базы данных не может быть пустым!" + RESET);
+                    continue; //возвращаемся в начало и просим выбрать заново пжпж
+                }
 
                 //добавляем .db, если нет
                 if(!newdb_name.toLowerCase().endsWith(".db")){
@@ -82,7 +90,7 @@ public class Main {
                     System.out.println(RED + "Ошибка: база данных с именем '" + newdb_name + "' уже существует!" + RESET);
                     System.out.println("\n" + CYAN + "Вы можете:" + RESET);
                     System.out.println(" 1. Ввести " + CYAN + "другое имя" + RESET + " для новой базы данных");
-                    System.out.println(" 2. Ввести " + CYAN + "номер" + RESET + " существующей базы из списка выше\n");
+                    System.out.println(" 2. Ввести " + CYAN + "номер" + RESET + " существующей базы из списка выше");
 
                     //System.out.println("Попробуйте ввести другое имя или выберите существующую базу из списка.\n");
                     continue; //возвращаемся в начало цикла и просим ввести выбор заново
@@ -103,7 +111,7 @@ public class Main {
                         file_name = load_file.getAbsolutePath();
                         DataBase load_bd = DataBase.load(file_name);                      //пытаемся загрузить бд
                         if(load_bd == null){
-                            System.out.println("Ошибка: не удалось открыть базу данных");
+                            System.out.println(RED + "Ошибка: не удалось открыть базу данных" + RESET);
                             System.out.println("Возможно файл имеет неверный формат (например SQLite) или поврежден");
                             System.out.println("Откройте файл с правильным форматом ИЛИ создайте новую бд, нажав 0");
                         }
@@ -112,11 +120,11 @@ public class Main {
                         }
                     }
                     else{
-                        System.out.println("Неверный номер, попробуйте еще раз ввести нужное число ИЛИ введите 0 для создания новой бд");
+                        System.out.println(RED + "Неверный номер, попробуйте еще раз ввести нужное число ИЛИ введите 0 для создания новой бд" + RESET);
                     }
                 }
                 catch(NumberFormatException e){                             //если буквы
-                    System.out.println("Нужно ввести число, а не букву или слово");
+                    System.out.println(RED + "Ошибка: нужно ввести число, а не букву или слово" + RESET );
                 }
             }
         }
@@ -138,13 +146,10 @@ public class Main {
         System.out.println("Для выхода из программы введите " + CYAN + "exit" + RESET);
         System.out.println("--------------------------------------------------");
 
-        //System.out.println("\nМожете вводить SQL запросы.\nДля выхода из программы введите exit");
-
         while(true){                                                                    //пока не ввели exit во всех его возможных вариациях этот цикл будет работать, это основной цикл, который связывает все папки в единое целое
             File f = new File(file_name);
             String short_name = f.getName().replace(".db", "");
             System.out.print(GREEN + "[" + short_name + "]> " + RESET);
-            //System.out.println(file_name.replace(".db", ""));
 
             String sql_promt = scaner.nextLine().trim();
             if(sql_promt.equalsIgnoreCase("exit") || sql_promt.equalsIgnoreCase("exit;")){
@@ -179,7 +184,7 @@ public class Main {
                         struct.add_column(new Column(col_name, type, isprimary_key));       //добавляем новую строку в структуру на шей новой таблички
                     }
                     bd.add_table(new Table(struct));                                        //добавляем только что созданную таблицу в базу данных
-                    System.out.println(GREEN + "Таблица " + CYAN + table_name + GREEN + " успешно создана!" + RESET);
+                    System.out.println("Таблица " + CYAN + table_name + RESET + " успешно" + GREEN + " создана"+ RESET+ "!");
                     bd.save(file_name);                                                     //сохраняем
                     continue;
                 }
@@ -219,7 +224,7 @@ public class Main {
                         }
                     }
                     table.insert(new_row);                                          //добавляем в таблицу обработанную строку
-                    System.out.println(GREEN + "Запись успешно добавлена" + RESET);
+                    System.out.println("Запись " + "успешно" + GREEN+ " добавлена" + RESET);
                     bd.save(file_name);                                             //сохраняем
                 }
 
@@ -239,7 +244,7 @@ public class Main {
                     System.out.println("\n" + "--- Результат запроса " + CYAN + "SELECT" +RESET+ " ---" ); //чутьчуть эстетики
 
                     if (matched_row.isEmpty()) {                    //если после фильтрации ничего не осталось
-                        System.out.println("Строки не найдены.");
+                        System.out.println(YELLOW + "Строки не найдены" + RESET);
                     } else {                                        //если строки есть, начинаем их красиво выводить
                         //создаем список колонок, которые будем печатать
                         List<Column> cols_to_print = new ArrayList<>();
@@ -318,7 +323,7 @@ public class Main {
 
                 else if(command instanceof Drop){                                       //обрабатываем DROP
                     bd.drop_table(table_name);
-                    System.out.println(GREEN + "Таблица " + CYAN + table_name + GREEN + " успешно удалена из базы данных" + RESET);
+                    System.out.println("Таблица " + CYAN + table_name + RESET + " успешно" + GREEN+" удалена" + RESET + " из базы данных");
                     bd.save(file_name);
 
                     //не осталась ли база пустой после удаления?

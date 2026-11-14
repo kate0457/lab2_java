@@ -24,12 +24,24 @@ public class SqlParser {
     public SqlCommand parse(String promt){                                                                            //функция, которая конкретно осознает что за запрос и что с ним надо делать, чтоб дальше в core и в app все работало
         List<String> tokens = tokenize(promt);
         if (tokens.isEmpty()){
-            throw new UnsupportedOperationException("Вы ввели пустоту");
+            throw new UnsupportedOperationException("Ошибка: Вы ввели пустоту");
         }
         String first_word = tokens.getFirst().toUpperCase();                                                          //берем первое слово, тк у всех наших команд оно разное и по нему оч удобно различать команды
         switch (first_word){
             case "INSERT": {                                                                                          //разбираем insert
+                if (tokens.size() < 2 || !tokens.get(1).toUpperCase().equals("INTO")) {
+                    throw new IllegalArgumentException("Ошибка: пропущено ключевое слово INTO");
+                }
+
+                if (tokens.size() < 3) {
+                    throw new IllegalArgumentException("Ошибка: пропущено имя таблицы");
+                }
+
                 String table_name = tokens.get(2).trim();                                                                    //берем имя таблицы, так как это единственный обязательный атрибут дял всех команд
+                if (table_name.toUpperCase().equals("VALUES")) {
+                    throw new IllegalArgumentException("Ошибка: пропущено имя таблицы");
+                }
+
                 List<String> raw_val = new ArrayList<>();
                 List<String> col_name = null;
                 int values_index = 0;
@@ -41,7 +53,7 @@ public class SqlParser {
                 }
 
                 if (values_index == 0){
-                    throw new IllegalArgumentException("Ошибка синтаксиса INSERT: пропущено ключевое слово VALUES");
+                    throw new IllegalArgumentException("Ошибка: пропущено ключевое слово VALUES");
                 }
 
                 if (tokens.get(3).equals("(")){                                                                       //если у нас сначала идут столбики куда добавить значения, а потом VALUES и значения
@@ -65,7 +77,17 @@ public class SqlParser {
                 return new Insert(table_name, raw_val, col_name);                                                     //возвращаем объект типа INSERT
             }
             case "SELECT":{                                                                                           //разбираем SELECT
+                if (tokens.size() < 2) {
+                    throw new IllegalArgumentException("Ошибка: пропущены колонки или символ *");
+                }
+
+                if (tokens.get(1).toUpperCase().equals("FROM")) {
+                    throw new IllegalArgumentException("Ошибка: не указано, что именно выбрать (символ * или имена колонок)");
+                }
                 if (tokens.get(1).equals("*")){                                                                       //если нужно достать все столбцы
+                    if (tokens.size() < 4) {
+                        throw new IllegalArgumentException("Ошибка: пропущено имя таблицы после FROM");
+                    }
                     String table_name = tokens.get(3).trim();
                     Where final_cond = null;                                                                          //блок WHERE по-умолчанию делаем null, тк не везде это условие может быть
                     if (tokens.size() > 4 && tokens.get(4).toUpperCase().equals("WHERE")){                            //если все-таки условия на отбор есть
@@ -114,6 +136,14 @@ public class SqlParser {
                         col.add(token);
                     }
 
+                    if (index == 0) {
+                        throw new IllegalArgumentException("Ошибка: пропущено ключевое слово FROM");
+                    }
+
+                    if (index + 1 >= tokens.size()) {
+                        throw new IllegalArgumentException("Ошибка: пропущено имя таблицы после FROM");
+                    }
+
                     if (tokens.size() > (index + 2) && tokens.get(index + 2).toUpperCase().equals("WHERE")){          //та же самая логика как и сверху, только немного поменяны индексы
                         List<Where.SingleCondition> cond = new ArrayList<>();
                         List<String> log_op = new ArrayList<>();
@@ -148,7 +178,18 @@ public class SqlParser {
                 }
             }
             case "UPDATE":{                                                                                           //обрабатываем UPDATE
+                if (tokens.size() < 2) {
+                    throw new IllegalArgumentException("Ошибка: пропущено имя таблицы");
+                }
                 String table_name = tokens.get(1).trim();
+                if (table_name.toUpperCase().equals("SET")) {
+                    throw new IllegalArgumentException("Ошибка: пропущено имя таблицы");
+                }
+
+                if (tokens.size() < 3 || !tokens.get(2).toUpperCase().equals("SET")) {
+                    throw new IllegalArgumentException("Ошибка: пропущено ключевое слово SET");
+                }
+
                 Map<String, String> update_val = new HashMap<>();
                 Where final_cond = null;
                 int i = 3;                                                                                            //с 3 индекса, потому что скипаем UPDATE название_таблицы SET
@@ -195,6 +236,12 @@ public class SqlParser {
                 return new Update(table_name, update_val, final_cond);                                                //получаем готовый объект Uodate, с которым можно дальше работать
             }
             case "DELETE": {                                                                                          //разбираем запрос с DELETE
+                if (tokens.size() < 2 || !tokens.get(1).toUpperCase().equals("FROM")) {
+                    throw new IllegalArgumentException("Ошибка: пропущено ключевое слово FROM");
+                }
+                if (tokens.size() < 3) {
+                    throw new IllegalArgumentException("Ошибка: пропущено имя таблицы");
+                }
                 String table_name = tokens.get(2).trim();
                 Where final_cond = null;
                 if (tokens.get(3).toUpperCase().equals("WHERE") && tokens.size() > 6){                                //как и везде разбираем запрос с блоком WHERE
@@ -230,6 +277,13 @@ public class SqlParser {
                 return new Delete(table_name, final_cond);                                                            //получаем объект класса DELETE
             }
             case "CREATE":{                                                                                           //работает с запросом CREATE
+                if (tokens.size() < 2 || !tokens.get(1).toUpperCase().equals("TABLE")) {
+                    throw new IllegalArgumentException("Ошибка: пропущено ключевое слово TABLE");
+                }
+                if (tokens.size() < 3) {
+                    throw new IllegalArgumentException("Ошибка: пропущено имя таблицы");
+                }
+
                 String table_name = tokens.get(2).trim();
                 List<String> col_name = new ArrayList<>();
                 List<String> col_type = new ArrayList<>();
@@ -243,9 +297,24 @@ public class SqlParser {
                     col_type.add(tokens.get(i + 1));
                     i += 2;                                                                                           // +=2 тк мы сразу разбираем значение: название колонки - тип данных
                 }
+
+                if (col_name.isEmpty()) {
+                    throw new IllegalArgumentException("Ошибка: таблица должна содержать хотя бы одну колонку!");
+                }
+
                 return new Create(table_name, col_name, col_type);                                                    //готовый разобранный CREATE
             }
             case "DROP":                                                                                              //разбираем запрос с командой DROP
+                if (tokens.size() < 2) {
+                    throw new IllegalArgumentException("Ошибка: пропущено ключевое слово TABLE");
+                }
+                if (!tokens.get(1).toUpperCase().equals("TABLE")) {
+                    throw new IllegalArgumentException("Ошибка: пропущено ключевое слово TABLE");
+                }
+                if (tokens.size() < 3) {
+                    throw new IllegalArgumentException("Ошибка: пропущено имя таблицы");
+                }
+
                 String table_name = tokens.get(2).trim();
                 return new Drop(table_name);                                                                          //для нее нужно лишь название таблицы
             default:                                                                                                  //если какие-то другие команды, для которых мы не написали реализации, выводится сообщение
